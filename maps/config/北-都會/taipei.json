@@ -1,0 +1,20 @@
+{
+  "countryCodes": ["TW"],
+  "subdivisionInclusions": {
+    "TW": ["TW-TPE", "TW-NWT", "TW-KEE", "TW-TAO"]
+  },
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 400
+  },
+  "globalLocationFilter": "Roads0 gte 3",
+  "geometryFilters": [
+    {
+      "filePath": "maps/geojson/北-都會.geojson",
+      "inclusionMode": "include"
+    }
+  ],
+  "output": {
+    "locationTags": ["Buildings200", "Roads0", "SubdivisionCode"]
+  }
+}
