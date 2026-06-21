@@ -1,7 +1,7 @@
 {
   "countryCodes": ["TW"],
   "subdivisionInclusions": {
-    "TW": ["TW-TPE", "TW-NWT", "TW-TXG", "TW-TNN", "TW-KHH"]
+    "TW": ["TW-ILA"]
   },
   "distributionStrategy": {
     "key": "EvenlyByDistanceWithinCountry",
@@ -10,7 +10,7 @@
   "globalLocationFilter": "Roads0 gte 3",
   "geometryFilters": [
     {
-      "filePath": "maps/geojson/台灣都會-聯集.geojson",
+      "filePath": "maps/北台灣-都會/北台灣-都會.geojson",
       "inclusionMode": "include"
     }
   ],
