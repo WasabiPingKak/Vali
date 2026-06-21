@@ -1,0 +1,20 @@
+{
+  "countryCodes": ["TW"],
+  "subdivisionInclusions": {
+    "TW": ["TW-HUA", "TW-TTT"]
+  },
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 200
+  },
+  "globalLocationFilter": "Roads0 gte 3",
+  "geometryFilters": [
+    {
+      "filePath": "maps/geojson/東台灣、離島-都會.geojson",
+      "inclusionMode": "include"
+    }
+  ],
+  "output": {
+    "locationTags": ["Buildings200", "Roads0", "SubdivisionCode"]
+  }
+}

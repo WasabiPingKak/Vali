@@ -1,0 +1,3 @@
+TW-KIN	23	0	0m.
+TW-LIE	18	0	0m.
+TW-PEN	71	-1	200m.
