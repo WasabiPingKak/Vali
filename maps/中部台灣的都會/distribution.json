@@ -1,0 +1,25 @@
+{
+  "totalLocations": 1264,
+  "regions": [
+    {
+      "code": "TW-TXG",
+      "count": 592
+    },
+    {
+      "code": "TW-CHA",
+      "count": 281
+    },
+    {
+      "code": "TW-NAN",
+      "count": 156
+    },
+    {
+      "code": "TW-YUN",
+      "count": 127
+    },
+    {
+      "code": "TW-MIA",
+      "count": 108
+    }
+  ]
+}

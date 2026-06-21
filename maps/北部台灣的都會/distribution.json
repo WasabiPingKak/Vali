@@ -1,0 +1,33 @@
+{
+  "totalLocations": 1932,
+  "regions": [
+    {
+      "code": "TW-NWT",
+      "count": 716
+    },
+    {
+      "code": "TW-TPE",
+      "count": 424
+    },
+    {
+      "code": "TW-TAO",
+      "count": 415
+    },
+    {
+      "code": "TW-KEE",
+      "count": 114
+    },
+    {
+      "code": "TW-HSZ",
+      "count": 107
+    },
+    {
+      "code": "TW-HSQ",
+      "count": 102
+    },
+    {
+      "code": "TW-ILA",
+      "count": 54
+    }
+  ]
+}

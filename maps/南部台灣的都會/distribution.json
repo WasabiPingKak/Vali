@@ -1,0 +1,25 @@
+{
+  "totalLocations": 1212,
+  "regions": [
+    {
+      "code": "TW-KHH",
+      "count": 503
+    },
+    {
+      "code": "TW-TNN",
+      "count": 317
+    },
+    {
+      "code": "TW-CYI",
+      "count": 216
+    },
+    {
+      "code": "TW-PIF",
+      "count": 168
+    },
+    {
+      "code": "TW-CYQ",
+      "count": 8
+    }
+  ]
+}
