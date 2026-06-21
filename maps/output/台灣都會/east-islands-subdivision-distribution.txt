@@ -1,0 +1,5 @@
+TW-HUA	174	-1	200m.
+TW-KIN	20	0	0m.
+TW-LIE	18	0	0m.
+TW-PEN	72	0	0m.
+TW-TTT	82	0	0m.

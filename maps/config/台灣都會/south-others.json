@@ -1,0 +1,20 @@
+{
+  "countryCodes": ["TW"],
+  "subdivisionInclusions": {
+    "TW": ["TW-PIF"]
+  },
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 200
+  },
+  "globalLocationFilter": "Roads0 gte 3",
+  "geometryFilters": [
+    {
+      "filePath": "maps/geojson/台灣都會-聯集.geojson",
+      "inclusionMode": "include"
+    }
+  ],
+  "output": {
+    "locationTags": ["Buildings200", "Roads0", "SubdivisionCode"]
+  }
+}
