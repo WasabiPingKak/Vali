@@ -10,7 +10,7 @@
   "globalLocationFilter": "Roads0 gte 3",
   "geometryFilters": [
     {
-      "filePath": "maps/東部台灣、離島的都會/東部台灣、離島的都會.geojson",
+      "filePath": "maps/東部台灣的都會與全台離島/東部台灣的都會與全台離島.geojson",
       "inclusionMode": "include"
     }
   ],
