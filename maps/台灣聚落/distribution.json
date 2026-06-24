@@ -1,0 +1,27 @@
+{
+  "totalLocations": 8549,
+  "regions": [
+    { "code": "TW-TXG", "count": 1095 },
+    { "code": "TW-HUA", "count": 907 },
+    { "code": "TW-PIF", "count": 706 },
+    { "code": "TW-KHH", "count": 657 },
+    { "code": "TW-NWT", "count": 648 },
+    { "code": "TW-CHA", "count": 601 },
+    { "code": "TW-TAO", "count": 580 },
+    { "code": "TW-TNN", "count": 545 },
+    { "code": "TW-TTT", "count": 449 },
+    { "code": "TW-NAN", "count": 325 },
+    { "code": "TW-MIA", "count": 300 },
+    { "code": "TW-TPE", "count": 282 },
+    { "code": "TW-CYQ", "count": 269 },
+    { "code": "TW-HSQ", "count": 246 },
+    { "code": "TW-YUN", "count": 236 },
+    { "code": "TW-ILA", "count": 205 },
+    { "code": "TW-KIN", "count": 156 },
+    { "code": "TW-HSZ", "count": 108 },
+    { "code": "TW-KEE", "count": 79 },
+    { "code": "TW-CYI", "count": 69 },
+    { "code": "TW-PEN", "count": 58 },
+    { "code": "TW-LIE", "count": 28 }
+  ]
+}
