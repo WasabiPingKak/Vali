@@ -101,3 +101,17 @@ maps/
 ## 都會地圖共通篩選條件
 
 所有都會地圖使用 `Roads0 gte 3`，搭配 GeoJSON 多邊形框選範圍。
+
+## 聚落地圖共通參數
+
+所有聚落地圖共用以下設定，新建聚落地圖時以此為基準：
+
+| 參數 | 值 | 說明 |
+|---|---|---|
+| `globalLocationFilter` | `Buildings200 gte 4 and Roads0 gte 2` | 200m 內至少 4 棟建築且至少 2 條道路 |
+| `distributionStrategy.key` | `FixedCountByCoverageDensity` | 依涵蓋密度分配固定數量 |
+| `distributionStrategy.minMinDistance` | `150` | 最小間距 150m |
+| `distributionStrategy.coverageDensityTuningFactor` | `0.7` | 壓縮高密度區域配額 |
+| `output.locationTags` | `["Buildings200", "Roads0", "SubdivisionCode"]` | 標準輸出標籤 |
+
+各地圖依國家調整的參數：`locationCountGoal`、`subdivisionDistribution`、`treatCountriesAsSingleSubdivision`。
