@@ -283,3 +283,9 @@ yarn-error.log*
 publish.txt
 **/BenchmarkDotNet.Artifacts/
 src/Vali/Properties/
+
+# Vali location data (binary, very large)
+data/
+
+# Geocode cache (per-map local cache, regenerable)
+.geocode-cache.json

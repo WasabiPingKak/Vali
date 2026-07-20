@@ -1,0 +1,24 @@
+{
+  "regions": [
+    {
+      "code": "TW-KHH",
+      "count": 1000
+    },
+    {
+      "code": "TW-PIF",
+      "count": 1000
+    },
+    {
+      "code": "TW-TNN",
+      "count": 1000
+    },
+    {
+      "code": "TW-CYQ",
+      "count": 676
+    },
+    {
+      "code": "TW-CYI",
+      "count": 324
+    }
+  ]
+}

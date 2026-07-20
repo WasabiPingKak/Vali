@@ -34,7 +34,6 @@ maps/
 
 ```json
 {
-  "totalLocations": 5730,
   "regions": [
     { "code": "TW-TPE", "count": 413 },
     { "code": "TW-NWT", "count": 727 }
@@ -44,14 +43,12 @@ maps/
 
 | 欄位 | 類型 | 必填 | 說明 |
 |---|---|---|---|
-| `totalLocations` | number | 是 | 地圖內的落點總數 |
 | `regions` | array | 是 | 各行政區的落點統計 |
 | `regions[].code` | string | 是 | ISO 3166-2 行政區代碼（如 `TW-TPE`、`JP-13`、`US-CA`） |
 | `regions[].count` | number | 是 | 該行政區的落點數量 |
 
 注意事項：
 - `code` 使用 [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) 標準代碼，與語言無關。行政區的顯示名稱由前端根據使用者語系決定。
-- `regions` 內所有 `count` 的加總應等於 `totalLocations`。
 - 排列順序不限，前端自行決定排序方式。
 
 ## 產生流程
@@ -60,6 +57,28 @@ maps/
 2. 撰寫 `config/*.json` 設定檔（指定行政區、密度、篩選條件）
 3. 執行 `vali generate --file config/xxx.json`（從專案根目錄執行）
 4. 合併所有 `output/*.json` 為最終 `{地圖名稱}.json`
+
+## distribution.json 產生方式
+
+依落點來源不同，有兩種方式：
+
+### Vali 產出的地圖
+
+直接從 `output/*-subdivision-distribution.txt` 整理。Vali generate 產出時已含各行政區統計，手動轉成 JSON 格式即可。
+
+### 外部來源的落點（手動挑選的座標）
+
+落點 JSON 的 `countryCode`/`stateCode` 通常是 null，需要用邊界資料做 point-in-polygon。使用專案內的腳本：
+
+```bash
+python scripts/gen-distribution.py maps/台灣人測試/台灣人測試.json
+# 或傳資料夾，自動找 customCoordinates JSON
+python scripts/gen-distribution.py maps/台灣人測試/
+```
+
+腳本用 GADM 行政區邊界在本地做 point-in-polygon（需要 `pip install shapely`），不打外部 API，幾百個座標不到 1 秒。
+
+邊界資料 `scripts/gadm41_TWN_2.json` 已含在 repo 中，目前只支援台灣。
 
 ## 現有地圖
 

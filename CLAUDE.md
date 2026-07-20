@@ -66,6 +66,14 @@ Filters apply at three levels: global, per-country, per-subdivision. Types:
 
 `Vali.Core/Validation/` contains validators that run before map generation: `GenerateFileValidator`, `FilterValidation`, `DistributionStrategyValidation`, `OutputValidation`, `InclusionValidation`, `DistributionValidation`.
 
+## Scripts
+
+- **`scripts/gen-distribution.py`** — 從地圖 JSON 產生 `distribution.json`（各行政區落點數量統計）。用 GADM 邊界資料 + shapely 做本地 point-in-polygon，不打外部 API。需要 `pip install shapely`，邊界資料 `scripts/gadm41_TWN_2.json` 已含在 repo。目前只支援台灣座標。
+
+```bash
+python scripts/gen-distribution.py maps/台灣人測試/
+```
+
 ## Technology
 
 - .NET 8 (net8.0), C# 13, nullable reference types

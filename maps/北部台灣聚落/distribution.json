@@ -1,0 +1,32 @@
+{
+  "regions": [
+    {
+      "code": "TW-NWT",
+      "count": 1000
+    },
+    {
+      "code": "TW-TAO",
+      "count": 1000
+    },
+    {
+      "code": "TW-TPE",
+      "count": 1000
+    },
+    {
+      "code": "TW-ILA",
+      "count": 917
+    },
+    {
+      "code": "TW-HSQ",
+      "count": 629
+    },
+    {
+      "code": "TW-KEE",
+      "count": 435
+    },
+    {
+      "code": "TW-HSZ",
+      "count": 362
+    }
+  ]
+}
