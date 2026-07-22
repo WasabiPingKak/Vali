@@ -10,7 +10,7 @@
 ### AT Austria 奧地利
 - Vienna 維也納 — 首都
 - Salzburg 薩爾茨堡 — 莫札特城
-- Innsbruck 因斯布魯克 — 阿爾卑斯山城
+
 
 ### BA Bosnia and Herzegovina 波赫
 - Sarajevo 塞拉耶佛 — 首都
@@ -19,17 +19,17 @@
 ### BE Belgium 比利時
 - Brussels 布魯塞爾 — 首都
 - Antwerp 安特衛普 — 荷語區大城
-- Bruges 布魯日 — 運河古城
+
 
 ### BG Bulgaria 保加利亞
 - Sofia 索菲亞 — 首都
 - Plovdiv 普羅夫迪夫 — 古城
-- Varna 瓦爾納 — 黑海海岸
+
 
 ### CH Switzerland 瑞士
 - Zürich 蘇黎世 — 德語區
 - Geneva 日內瓦 — 法語區
-- Bern 伯恩 - 首都
+
 
 ### CY Cyprus 賽普勒斯
 - Nicosia 尼古西亞 — 首都
@@ -41,7 +41,7 @@
 
 ### DE Germany 德國
 - Berlin 柏林 — 首都
-- Munich 慕尼黑 — 南部巴伐利亞
+
 - Hamburg 漢堡 — 北部港城
 
 ### DK Denmark 丹麥
@@ -55,12 +55,12 @@
 ### ES Spain 西班牙
 - Madrid 馬德里 — 首都
 - Barcelona 巴塞隆納 — 加泰隆尼亞
-- Seville 塞維亞 — 安達盧西亞
+
 
 ### FI Finland 芬蘭
 - Helsinki 赫爾辛基 — 首都
 - Tampere 坦佩雷 — 內陸城
-- Oulu 奧盧 — 北部城市
+
 
 ### FO Faroe Islands 法羅群島
 - Tórshavn 托爾斯港 — 唯一主要城鎮
@@ -68,18 +68,16 @@
 ### FR France 法國
 - Paris 巴黎 — 首都
 - Lyon 里昂 — 中部大城
-- Nice 尼斯 — 南法蔚藍海岸
+
 
 ### GB United Kingdom 英國
 - London 倫敦 — 首都
-- Edinburgh 愛丁堡 — 蘇格蘭首府
 - Manchester 曼徹斯特 — 英格蘭北部
-- Belfast 貝爾法斯特 — 北愛爾蘭
 
 ### GR Greece 希臘
 - Athens 雅典 — 首都
 - Thessaloniki 塞薩洛尼基 — 北部大城
-- Heraklion 伊拉克利翁 — 克里特島
+
 
 ### HR Croatia 克羅埃西亞
 - Zagreb 札格瑞布 — 首都
@@ -92,7 +90,7 @@
 ### IE Ireland 愛爾蘭
 - Dublin 都柏林 — 首都
 - Cork 科克 — 南部
-- Galway 戈爾韋 — 西部
+
 
 ### IS Iceland 冰島
 - Reykjavik 雷克雅維克 — 首都
@@ -101,8 +99,6 @@
 ### IT Italy 義大利
 - Rome 羅馬 — 首都
 - Milan 米蘭 — 北部商業中心
-- Naples 那不勒斯 — 南部大城
-- Palermo 巴勒摩 — 西西里島
 
 ### LI Liechtenstein 列支敦士登
 - 整國（微型國）
@@ -116,7 +112,7 @@
 
 ### LV Latvia 拉脫維亞
 - Riga 里加 — 首都
-- Liepāja 利耶帕亞 — 西部港城
+
 - Daugavpils 道加瓦皮爾斯 — 東部大城
 
 ### MC Monaco 摩納哥
@@ -136,28 +132,26 @@
 ### NL Netherlands 荷蘭
 - Amsterdam 阿姆斯特丹 — 首都
 - Rotterdam 鹿特丹 — 現代港都
-- Utrecht 烏特勒支 — 古城
-- The Hague 海牙 — 政府所在地、國際法庭
 
 ### NO Norway 挪威
 - Oslo 奧斯陸 — 首都
 - Bergen 卑爾根 — 西部峽灣入口
-- Tromsø 特羅姆瑟 — 北極圈城市
+
 
 ### PL Poland 波蘭
 - Warsaw 華沙 — 首都
 - Kraków 克拉科夫 — 古都
-- Gdańsk 格但斯克 — 波羅的海港城
+
 
 ### PT Portugal 葡萄牙
 - Lisbon 里斯本 — 首都
 - Porto 波爾圖 — 北部大城
-- Faro 法魯 — 南部阿爾加維
+
 
 ### RO Romania 羅馬尼亞
 - Bucharest 布加勒斯特 — 首都
 - Cluj-Napoca 克盧日-納波卡 — 外西凡尼亞
-- Brașov 布拉索夫 — 外西凡尼亞山城
+
 
 ### RS Serbia 塞爾維亞
 - Belgrade 貝爾格勒 — 首都
@@ -172,7 +166,7 @@
 ### SE Sweden 瑞典
 - Stockholm 斯德哥爾摩 — 首都
 - Gothenburg 哥特堡 — 西岸
-- Malmö 馬爾默 — 南部
+
 
 ### SI Slovenia 斯洛維尼亞
 - Ljubljana 盧比安納 — 首都
@@ -187,7 +181,7 @@
 
 ### UA Ukraine 烏克蘭
 - Kyiv 基輔 — 首都
-- Lviv 利維夫 — 西部文化城
+
 - Odesa 敖德薩 — 黑海港城
 
 ## 亞洲
@@ -397,6 +391,8 @@
 - Vancouver 溫哥華 — 西岸太平洋
 - Montreal 蒙特婁 — 法語區大城
 - Calgary 卡加利 — 西部草原
+- Ottawa 渥太華 — 首都
+- Quebec City 魁北克市 — 法語區古城
 
 ### CR Costa Rica 哥斯大黎加
 - San José 聖荷西 — 首都
@@ -442,6 +438,9 @@
 - Seattle 西雅圖 — 西北太平洋
 - Miami 邁阿密 — 佛羅里達南端
 - Hawaii 夏威夷 — 太平洋群島
+- Washington D.C. 華盛頓 — 首都
+- San Francisco 舊金山 — 西岸灣區
+- Las Vegas 拉斯維加斯 — 內華達沙漠城
 
 ## 南美洲
 
