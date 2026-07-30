@@ -59,11 +59,12 @@ public class LocationLakeMapGenerator
                     subdivisionFiles,
                     subDivisions,
                     mapDefinition),
-                DistributionStrategies.EvenlyByDistanceWithinCountry => DistributionStrategies.EvenlyByDistanceInCountry(
+                DistributionStrategies.EvenlyByDistanceWithinCountry => await DistributionStrategies.EvenlyByDistanceInCountry(
                     countryCode,
                     subdivisionFiles,
                     subDivisions,
-                    mapDefinition),
+                    mapDefinition,
+                    parallelism),
                 _ => throw new ArgumentOutOfRangeException()
             };
             subdivisionGroups.AddRange(locationChunks);
