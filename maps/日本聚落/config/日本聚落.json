@@ -1,0 +1,27 @@
+{
+  "countryCodes": ["JP"],
+  "distributionStrategy": {
+    "key": "FixedCountByCoverageDensity",
+    "locationCountGoal": 50000,
+    "minMinDistance": 150,
+    "coverageDensityTuningFactor": 0.7
+  },
+  "subdivisionDistribution": {
+    "JP": {
+      "JP-01": 1, "JP-02": 1, "JP-03": 1, "JP-04": 1, "JP-05": 1,
+      "JP-06": 1, "JP-07": 1, "JP-08": 1, "JP-09": 1, "JP-10": 1,
+      "JP-11": 1, "JP-12": 1, "JP-13": 1, "JP-14": 1, "JP-15": 1,
+      "JP-16": 1, "JP-17": 1, "JP-18": 1, "JP-19": 1, "JP-20": 1,
+      "JP-21": 1, "JP-22": 1, "JP-23": 1, "JP-24": 1, "JP-25": 1,
+      "JP-26": 1, "JP-27": 1, "JP-28": 1, "JP-29": 1, "JP-30": 1,
+      "JP-31": 1, "JP-32": 1, "JP-33": 1, "JP-34": 1, "JP-35": 1,
+      "JP-36": 1, "JP-37": 1, "JP-38": 1, "JP-39": 1, "JP-40": 1,
+      "JP-41": 1, "JP-42": 1, "JP-43": 1, "JP-44": 1, "JP-45": 1,
+      "JP-46": 1, "JP-47": 1
+    }
+  },
+  "globalLocationFilter": "Buildings200 gte 4 and Roads0 gte 2",
+  "output": {
+    "locationTags": ["Buildings200", "Roads0", "SubdivisionCode"]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "countryCodes": [
+    "AE", "BD", "BT", "GE", "HK", "ID", "IL", "IN", "JO", "JP",
+    "KG", "KH", "KR", "KZ", "LA", "LB", "LK", "MN", "MO", "MY",
+    "NP", "OM", "PH", "PK", "PS", "QA", "SG", "TH", "TR", "TW", "VN"
+  ],
+  "distributionStrategy": {
+    "key": "FixedCountByCoverageDensity",
+    "locationCountGoal": 25200,
+    "minMinDistance": 150,
+    "coverageDensityTuningFactor": 0.6,
+    "coverageDensityClusterSize": 3
+  },
+  "globalLocationFilter": "Buildings200 gte 5 and Roads25 gte 3",
+  "enableDefaultLocationFilters": true,
+  "output": {
+    "locationTags": ["CountryCode"]
+  }
+}

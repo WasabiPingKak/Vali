@@ -1,0 +1,19 @@
+{
+  "countryCodes": [
+    "AU", "BW", "CC", "CX", "EG", "GH", "GL", "KE", "LS", "MG",
+    "ML", "NA", "NG", "NZ", "PN", "RE", "RW", "SN", "ST", "SZ",
+    "TN", "UG", "UM", "ZA"
+  ],
+  "distributionStrategy": {
+    "key": "FixedCountByCoverageDensity",
+    "locationCountGoal": 13800,
+    "minMinDistance": 150,
+    "coverageDensityTuningFactor": 0.6,
+    "coverageDensityClusterSize": 3
+  },
+  "globalLocationFilter": "Buildings200 gte 5 and Roads25 gte 3",
+  "enableDefaultLocationFilters": true,
+  "output": {
+    "locationTags": ["CountryCode"]
+  }
+}

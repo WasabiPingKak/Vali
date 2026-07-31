@@ -1,0 +1,16 @@
+{
+  "countryCodes": ["world"],
+  "distributionStrategy": {
+    "key": "FixedCountByCoverageDensity",
+    "locationCountGoal": 100000,
+    "minMinDistance": 150,
+    "countryDistributionFromMap": "aow",
+    "coverageDensityTuningFactor": 0.6,
+    "coverageDensityClusterSize": 3
+  },
+  "globalLocationFilter": "Buildings200 gte 5 and Roads25 gte 3",
+  "enableDefaultLocationFilters": true,
+  "output": {
+    "locationTags": ["CountryCode"]
+  }
+}

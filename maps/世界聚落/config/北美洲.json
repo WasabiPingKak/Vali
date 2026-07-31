@@ -1,0 +1,18 @@
+{
+  "countryCodes": [
+    "AS", "BM", "CA", "CR", "CW", "DO", "GT", "GU", "MP", "MQ",
+    "MX", "PA", "PR", "US", "VI"
+  ],
+  "distributionStrategy": {
+    "key": "FixedCountByCoverageDensity",
+    "locationCountGoal": 12800,
+    "minMinDistance": 150,
+    "coverageDensityTuningFactor": 0.6,
+    "coverageDensityClusterSize": 3
+  },
+  "globalLocationFilter": "Buildings200 gte 5 and Roads25 gte 3",
+  "enableDefaultLocationFilters": true,
+  "output": {
+    "locationTags": ["CountryCode"]
+  }
+}
