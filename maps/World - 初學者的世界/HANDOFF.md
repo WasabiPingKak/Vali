@@ -6,12 +6,12 @@
 
 ## 目前狀態（2026-07-31）
 
-**109 國已全部產出點位**，結果在 `config/_tmp/{cc}-evenly-locations.json`。
+**109 國已全部產出點位**，結果在 `locations/{cc}.json`（檔名用 geojson 命名，英國是 `uk.json`）。各國 Vali 設定在 `config/{cc}.json`，各國點數統計見 `point-counts.md`。
 
-尚缺：
+手選國家（不用程式跑）：
 
-- **HR**（克羅埃西亞）：geojson 還沒畫
-- **EG**（埃及）、**CX**（聖誕島）：countries.md 標註為「手選，不用程式跑」
+- **EG**（埃及）、**CX**（聖誕島）：countries.md 原本就標註手選
+- **BM**（百慕達）：Vali 資料庫整島只有 113 個點位，程式產不出有意義的結果
 
 ## 最終採用的策略
 
@@ -49,11 +49,11 @@
 
 TW 15,997 / JP 11,997 / SG 10,331 / CA 8,933 / KR 8,059 / ID 7,380 / TR 7,348 / MY 7,192 / CZ 6,332 / KZ 5,943 / BG 5,841 / GB 5,750 / ES 5,438 / IN 5,319 / HK 5,308 / US 5,061 / DE 5,030 / AE 5,035 / NL 4,870 …
 
-完整清單直接看 `config/_tmp/` 目錄。點數差異來自多邊形面積與當地 Street View 覆蓋密度,微型國（MC 38、ST 25、BM 4）是正常現象。
+完整清單見 `point-counts.md`。點數差異來自多邊形面積與當地 Street View 覆蓋密度,微型國（MC 38、ST 25）是正常現象。
 
 ## 批次腳本
 
-逐國跑、自動跳過已完成的國家。腳本邏輯:掃描各洲目錄的 geojson → 產生單國 config（`config/_tmp/{cc}-evenly.json`）→ `vali generate` → 輸出 `{cc}-evenly-locations.json`。檔名 `uk.geojson` 對應 country code `GB`。
+`run-all.sh`:逐國跑、自動跳過 `locations/` 已有結果的國家。腳本邏輯:掃描各洲目錄的 geojson → 產生單國 config（`config/{cc}.json`,已存在則沿用）→ `vali generate` → 結果搬到 `locations/{cc}.json`。重跑某國:刪掉 `locations/{cc}.json` 再執行腳本。檔名 `uk.geojson` 對應 country code `GB`。
 
 多國一起跑（一個 config 塞整洲）會 OOM,務必逐國跑。
 

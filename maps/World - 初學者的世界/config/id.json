@@ -1,0 +1,15 @@
+{
+  "countryCodes": ["ID"],
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 100
+  },
+  "globalLocationFilter": "Buildings200 gte 3 and Roads0 gte 2",
+  "enableDefaultLocationFilters": true,
+  "geometryFilters": [
+    { "filePath": "maps/World - 初學者的世界/亞洲/id.geojson", "inclusionMode": "include", "combinationMode": "union" }
+  ],
+  "output": {
+    "locationTags": ["CountryCode"]
+  }
+}

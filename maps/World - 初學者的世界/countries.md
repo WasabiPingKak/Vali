@@ -167,10 +167,8 @@
 - Stockholm 斯德哥爾摩 — 首都
 - Gothenburg 哥特堡 — 西岸
 
-
 ### SI Slovenia 斯洛維尼亞
 - Ljubljana 盧比安納 — 首都
-- Maribor 馬里博爾 — 第二大城
 
 ### SK Slovakia 斯洛伐克
 - Bratislava 布拉提斯拉瓦 — 首都
@@ -181,7 +179,6 @@
 
 ### UA Ukraine 烏克蘭
 - Kyiv 基輔 — 首都
-
 - Odesa 敖德薩 — 黑海港城
 
 ## 亞洲
@@ -196,7 +193,6 @@
 
 ### BT Bhutan 不丹
 - Thimphu 廷布 — 首都
-- Paro 帕羅 — 機場所在地、虎穴寺
 
 ### GE Georgia 喬治亞
 - Tbilisi 提比里斯 — 首都
@@ -383,8 +379,9 @@
 
 ## 北美洲
 
-### BM Bermuda 百慕達
+### BM Bermuda 百慕達（手選，不用程式跑）
 - Hamilton 哈密爾頓 — 首府（小島）
+- Vali 資料庫整島只有 113 個點位，程式跑不出結果，直接在 GeoGuessr 手動選點
 
 ### CA Canada 加拿大
 - Toronto 多倫多 — 最大城
@@ -410,7 +407,6 @@
 
 ### GT Guatemala 瓜地馬拉
 - Guatemala City 瓜地馬拉市 — 首都
-- Antigua 安提瓜 — 殖民古城
 
 ### GU Guam 關島
 - Hagåtña 阿加尼亞 — 首府（小島）
@@ -469,8 +465,6 @@
 ### CO Colombia 哥倫比亞
 - Bogotá 波哥大 — 首都
 - Medellín 麥德林 — 第二大城
-- Cartagena 卡塔赫納 — 加勒比海岸古城
-- Barranquilla 巴蘭基亞 — 加勒比海岸港城
 
 ### EC Ecuador 厄瓜多
 - Quito 基多 — 首都
@@ -479,7 +473,6 @@
 ### PE Peru 秘魯
 - Lima 利馬 — 首都
 - Cusco 庫斯科 — 印加古都
-- Arequipa 阿雷基帕 — 南部白色城
 
 ### PY Paraguay 巴拉圭
 - Asunción 亞松森 — 首都

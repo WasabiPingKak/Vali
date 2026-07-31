@@ -1,0 +1,15 @@
+{
+  "countryCodes": ["BA"],
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 100
+  },
+  "globalLocationFilter": "Buildings200 gte 3 and Roads0 gte 2",
+  "enableDefaultLocationFilters": true,
+  "geometryFilters": [
+    { "filePath": "maps/World - 初學者的世界/歐洲/ba.geojson", "inclusionMode": "include", "combinationMode": "union" }
+  ],
+  "output": {
+    "locationTags": ["CountryCode"]
+  }
+}
