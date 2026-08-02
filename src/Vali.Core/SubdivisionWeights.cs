@@ -3272,7 +3272,13 @@ public class SubdivisionWeights
 
     private static readonly Dictionary<string, (int weight, string subdivisionName)> XK = new()
     {
-        { "XK-1", (10, "Kosovo") },
+        { "XK-01", (105, "Ferizaj") },
+        { "XK-02", (98, "Gjakova") },
+        { "XK-03", (130, "Gjilan") },
+        { "XK-04", (100, "Mitrovica") },
+        { "XK-05", (106, "Peja") },
+        { "XK-06", (253, "Prishtina") },
+        { "XK-07", (163, "Prizren") },
     };
 
     private static readonly Dictionary<string, (int weight, string subdivisionName)> CY = new()
@@ -3415,6 +3421,7 @@ public class SubdivisionWeights
             { "CY", CY },
             { "PY", PY },
             { "GE", GE },
+            { "XK", XK },
         };
 
     public static readonly Dictionary<string, Dictionary<string, (int weight, string subdivisionName)>> NotQuiteThereYetCountryToSubdivision =
@@ -3448,7 +3455,6 @@ public class SubdivisionWeights
             { "NC", NC },
             { "TO", TO },
             { "TV", TV },
-            { "XK", XK },
         };
 
     private static Dictionary<string, SubdivisionInfo[]>? _subdivisions;

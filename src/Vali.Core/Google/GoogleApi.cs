@@ -508,6 +508,231 @@ public class GoogleApi
         return JsonSerializer.Deserialize<string[]>(response.Split("\n")[1])?[0];
     }
 
+    // Web-Mercator / slippy-map tile coordinate at the given zoom. asinh(x) = ln(x + sqrt(x^2 + 1)).
+    public static (int x, int y) TileCoord(double lat, double lng, int zoom = 17)
+    {
+        var latRad = lat * Math.PI / 180.0;
+        var n = 1 << zoom; // 2^zoom
+        var x = (int)Math.Floor((lng + 180.0) / 360.0 * n);
+        var y = (int)Math.Floor((1 - Math.Asinh(Math.Tan(latRad)) / Math.PI) / 2 * n);
+        return (x, y);
+    }
+
+    public static async Task<string[]> PanoIdsInTile(int x, int y, int zoom = 17)
+    {
+        var url = $"https://www.google.com/maps/photometa/ac/v1?pb=!1m1!1smaps_sv.tactile!6m3!1i{x}!2i{y}!3i{zoom}!8b1";
+        string content;
+        try
+        {
+            var response = await _shortenerClient.GetAsync(url);
+            content = await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return [];
+        }
+
+        try
+        {
+            // Strip the ")]}'" XSSI guard prefix by jumping to the first '['.
+            var bracket = content.IndexOf('[');
+            if (bracket < 0)
+            {
+                return [];
+            }
+
+            var node = JsonNode.Parse(content[bracket..]);
+            // Pano-list shape: node[1][1] holds the panos. The endpoint also returns a "region" shape
+            // (node[1] == [], sub-cell entries with cell ids — not panos — at node[2]) for some tiles.
+            // JsonArray indexing throws on out-of-range (?. only guards null), so check the shape.
+            if (node is not JsonArray root || root.Count < 2 ||
+                root[1] is not JsonArray level1 || level1.Count < 2 ||
+                level1[1] is not JsonArray panos)
+            {
+                return [];
+            }
+
+            return panos
+                .Select(p => p?[0]?[0]?[1]?.GetValue<string>())
+                .Where(id => id != null)
+                .Select(id => id!)
+                .ToArray();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Failed parsing tile pano ids. {content}");
+            Console.WriteLine(e);
+            return [];
+        }
+    }
+
+    public static async Task<(MapCheckrLocation location, LocationLookupResult result)> GetLocationFromPanoId(
+        string panoId,
+        string? knownCountryCode,
+        Dictionary<string, CountryPanning?>? countryPanning)
+    {
+        var body = $"""
+                    [["apiv3",null,null,null,"US",null,null,null,null,null,[[0]]],["en","US"],[[[2,"{panoId}"]]],[[1,2,3,4,8,6]]]
+                    """;
+        string content;
+        try
+        {
+            var responseMessage = await _client.PostAsync(
+                "$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetMetadata",
+                new StringContent(body, Encoding.UTF8, "application/json+protobuf"));
+            content = await responseMessage.Content.ReadAsStringAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            return (new MapCheckrLocation { panoId = panoId }, LocationLookupResult.UnknownError);
+        }
+
+        try
+        {
+            var b = JsonNode.Parse(content)?[1]?[0];
+            if (b == null)
+            {
+                return (new MapCheckrLocation { panoId = panoId }, LocationLookupResult.NoImages);
+            }
+
+            // Stub / no-image responses (e.g. [[0],[[[2],[2,"pano"],null,null,null,null,null,[]]]]) leave
+            // the core metadata nodes null. Real panos always populate all of them, so bail out here
+            // rather than NRE on the hard dereferences below.
+            if (b[2]?[2]?[0] == null || b[3] == null || b[4] == null || b[5]?[0] == null || b[6] == null)
+            {
+                return (new MapCheckrLocation { panoId = panoId }, LocationLookupResult.NoImages);
+            }
+
+            var baseInfoArray = b[5]![0]!.AsArray();
+            var resolutionHeight = b[2]![2]![0]!.GetValue<int>();
+            var year = b[6]!.AsArray().Count >= 8 ? b[6]![7]![0]!.GetValue<int>() : -1;
+            var month = b[6]!.AsArray().Count >= 8 ? b[6]![7]![1]!.GetValue<int>() : -1;
+            var isScout = b[6]!.AsArray().Count >= 6 &&
+                          b[6]![5]!.AsArray().Count >= 3 &&
+                          b[6]![5]![2]!.GetValue<string>() == "scout";
+            var copyright = b[4]![0]![0]![0]![0]!.GetValue<string>();
+            var lat = baseInfoArray[1]![0]![2]!.GetValue<double>();
+            var lng = baseInfoArray[1]![0]![3]!.GetValue<double>();
+            var countryCode = baseInfoArray[1]!.AsArray().Count >= 5
+                ? baseInfoArray[1]![4]!.GetValue<string>()
+                : knownCountryCode;
+
+            var descriptionNode = b[3];
+            var desc = descriptionNode?.AsArray().Count >= 3 && descriptionNode[2] != null
+                ? descriptionNode[2]![0]![0]!.GetValue<string>()
+                : descriptionNode!.AsArray().Count >= 3 && descriptionNode[0] != null
+                    ? descriptionNode[0]![0]!.GetValue<string>()
+                    : null;
+            var subdivision = (descriptionNode.AsArray().Count >= 3 && descriptionNode[2] != null &&
+                               descriptionNode[2]!.AsArray().Count >= 2
+                ? descriptionNode[2]?[1]?[0]?.GetValue<string>()
+                : descriptionNode.AsArray().Count >= 3 && descriptionNode[2] != null &&
+                  descriptionNode[2]!.AsArray().Count >= 1
+                    ? descriptionNode[2]?[0]?[0]?.GetValue<string>()
+                    : null)?.Split(',').Last().Trim();
+
+            var elevation = baseInfoArray[1]!.AsArray().Count > 1 && baseInfoArray[1]![1] is not null
+                ? (baseInfoArray[1]![1]![0]?.GetValueKind() == JsonValueKind.String ? -1 : baseInfoArray[1]![1]![0]?.GetValue<double>() ?? -1)
+                : 0;
+            var arrows = baseInfoArray.Count > 6
+                ? baseInfoArray[6]?.AsArray().DistinctBy(x => x![1]![3]!.GetValue<double>()).ToArray() ?? []
+                : [];
+            var defaultDrivingDirectionAngle = baseInfoArray[1]!.AsArray().Count >= 3 &&
+                                               baseInfoArray[1]![2]?.AsArray().Count > 0 &&
+                                               baseInfoArray[1]![2]![0] != null &&
+                                               baseInfoArray[1]![2]![0]!.GetValueKind() == JsonValueKind.Number
+                ? (ushort)Math.Round(baseInfoArray[1]![2]![0]!.GetValue<decimal>(), 0)
+                : (ushort)1000;
+            var heading = Heading(countryPanning, countryCode, resolutionHeight, year, month, arrows, defaultDrivingDirectionAngle, lat, lng);
+
+            var alternativeImages = (baseInfoArray.Count > 8 && baseInfoArray[8]?.AsArray() != null
+                    ? baseInfoArray[8]!.AsArray().Select(x =>
+                    {
+                        var index = x![0]!.GetValue<int>();
+                        return new AlternativePano
+                        {
+                            Year = x[1]!.AsArray().Count >= 2 ? x[1]![0]!.GetValue<int>() : -1,
+                            Month = x[1]!.AsArray().Count >= 2 ? x[1]![1]!.GetValue<int>() : -1,
+                            PanoId = baseInfoArray[3]![0]![index]![0]![1]!.GetValue<string>()
+                        };
+                    }).ToArray()
+                    : [])
+                .Concat([new AlternativePano { Year = year, Month = month, PanoId = panoId }])
+                .Where(x => x.Year > 2000)
+                .DistinctBy(x => x.PanoId)
+                .OrderByDescending(x => x.Year)
+                .ThenByDescending(x => x.Month)
+                .ToArray();
+
+            if (year < 2005 || defaultDrivingDirectionAngle > 360)
+            {
+                return (new MapCheckrLocation { panoId = panoId }, LocationLookupResult.NoImages);
+            }
+
+            var result = resolutionHeight <= Resolution.Gen1
+                ? LocationLookupResult.Gen1
+                : CopyrightToLookupResult(copyright);
+
+            var location = new MapCheckrLocation
+            {
+                locationId = panoId,
+                lat = lat,
+                lng = lng,
+                heading = Math.Round(heading, 2),
+                countryCode = countryCode,
+                panoId = panoId,
+                year = year,
+                month = month,
+                drivingDirectionAngle = defaultDrivingDirectionAngle,
+                arrowCount = (ushort)arrows.Length,
+                elevation = (int)Math.Round(elevation, 0),
+                descriptionLength = desc?.Length ?? 0,
+                alternativePanos = alternativeImages.Where(a => a.PanoId != panoId).ToArray(),
+                subdivision = subdivision,
+                isScout = isScout,
+                resolutionHeight = resolutionHeight
+            };
+            return (location, result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Failed handling pano metadata. {content}");
+            Console.WriteLine(e);
+            return (new MapCheckrLocation { panoId = panoId }, LocationLookupResult.UnknownError);
+        }
+    }
+
+    public static async Task<IReadOnlyCollection<(MapCheckrLocation location, LocationLookupResult result)>> GetLocationsViaTiles(
+        IEnumerable<MapCheckrLocation> points,
+        string? countryCode,
+        int chunkSize,
+        Dictionary<string, CountryPanning?>? countryPanning,
+        int zoom = 17,
+        int picksPerTile = 1)
+    {
+        var tiles = points
+            .Select(p => TileCoord(p.lat, p.lng, zoom))
+            .Distinct()
+            .ToArray();
+
+        var panoIdsPerTile = await tiles.RunLimitedNumberAtATime(
+            t => PanoIdsInTile(t.x, t.y, zoom), chunkSize, null);
+
+        var pickedPanoIds = panoIdsPerTile
+            .Where(ids => ids.Length > 0)
+            .SelectMany(ids => ids.TakeRandom(Math.Min(picksPerTile, ids.Length)))
+            .Distinct()
+            .ToArray();
+
+        var results = await pickedPanoIds.RunLimitedNumberAtATime(
+            id => GetLocationFromPanoId(id, countryCode, countryPanning), chunkSize, null);
+
+        return results.ToArray();
+    }
+
     public enum LocationLookupResult
     {
         DefinitelyInvalid,

@@ -1,5 +1,6 @@
-﻿using Spectre.Console;
+﻿using System.Collections.Concurrent;
 using Vali.Core.Hash;
+using Vali.Core.LeanDeserialization;
 using Loc = Vali.Core.Location;
 
 namespace Vali.Core;
@@ -33,11 +34,26 @@ public static class DistributionStrategies
             return (Array.Empty<Loc>(), 0, 0);
         }
 
-        var neighborLocationBuckets = LocationLookupService.Bucketize(deserializeFromFile, mapDefinition.HashPrecisionFromNeighborFiltersRadius());
+        Dictionary<ulong, List<Loc>> neighborLocationBuckets;
+        using (GenPerf.Measure(GenPerf.Phase.Bucketize))
+        {
+            neighborLocationBuckets = LocationLookupService.Bucketize(deserializeFromFile, mapDefinition.HashPrecisionFromNeighborFiltersRadius());
+        }
+
         var proximityFilter = ProximityFilter(countryCode, mapDefinition, subdivision);
         var locationsFromFile = LocationReader.DeserializeLocationsFromFile(proximityFilter.LocationsPath);
-        var proximityLocationBuckets = LocationLookupService.Bucketize<ILatLng>(locationsFromFile, proximityFilter.HashPrecisionFromProximityFilter());
-        var filteredLocations = FilteredLocations(countryCode, mapDefinition, subdivision, deserializeFromFile, neighborLocationBuckets, proximityLocationBuckets, proximityFilter);
+        Dictionary<ulong, List<ILatLng>> proximityLocationBuckets;
+        using (GenPerf.Measure(GenPerf.Phase.Bucketize))
+        {
+            proximityLocationBuckets = LocationLookupService.Bucketize<ILatLng>(locationsFromFile, proximityFilter.HashPrecisionFromProximityFilter());
+        }
+
+        Loc[] filteredLocations;
+        using (GenPerf.Measure(GenPerf.Phase.Filter))
+        {
+            filteredLocations = FilteredLocations(countryCode, mapDefinition, subdivision, deserializeFromFile, neighborLocationBuckets, proximityLocationBuckets, proximityFilter);
+        }
+
         var regionGoalCount = mapDefinition.SubdivisionDistribution.TryGetValue(countryCode, out var subdivisionWeights) ?
             ((decimal)(subdivisionWeights.GetValueOrDefault(subdivision, 0)) / subdivisionWeights.Sum(x => x.Value) * goalCount).RoundToInt() :
             SubdivisionWeights.GoalForSubdivision(countryCode, subdivision, goalCount, availableSubdivisions);
@@ -48,17 +64,15 @@ public static class DistributionStrategies
 
         if (filteredLocations.Length == 0)
         {
-            return (Array.Empty<Loc>(), 0, 0);
+            return (Array.Empty<Loc>(), regionGoalCount, 0);
         }
 
         var minDistance = mapDefinition.DistributionStrategy.MinMinDistance;
 
-        var tuple = ByMaxMinDistance(filteredLocations, regionGoalCount, neighborLocationBuckets, minDistance, mapDefinition, countryCode, subdivision);
-        var diff = regionGoalCount - tuple.locations.Count;
-        var notEnoughLocationsMessage = diff > 0 ? $"[olive]{diff,4} locations short.[/]" : "";
-        if (!ConsoleLogger.Silent)
+        (IList<Loc> locations, int minDistance) tuple;
+        using (GenPerf.Measure(GenPerf.Phase.Distribute))
         {
-            AnsiConsole.MarkupLine($"[lightseagreen]{tuple.locations.Count,6:N0} locations in {subdivision,7}. At least {tuple.minDistance,7:N0}m. between each location.[/]{notEnoughLocationsMessage}");
+            tuple = ByMaxMinDistance(filteredLocations, regionGoalCount, neighborLocationBuckets, minDistance, mapDefinition, countryCode, subdivision);
         }
 
         return (tuple.locations, regionGoalCount, tuple.minDistance);
@@ -93,7 +107,7 @@ public static class DistributionStrategies
 
         if (filteredLocations.Length == 0)
         {
-            return (Array.Empty<Loc>(), 0, 0);
+            return (Array.Empty<Loc>(), regionGoalCount, 0);
         }
 
         var minDistance = mapDefinition.DistributionStrategy.MinMinDistance;
@@ -126,7 +140,7 @@ public static class DistributionStrategies
         var locations = FilteredLocations(countryCode, mapDefinition, "", allLocations, neighborLocationBuckets, proximityLocationBuckets, proximityFilter);
         if (locations.Length == 0)
         {
-            return [([], 0, 0)];
+            return [([], goalCount, 0)];
         }
 
         var locationProbability = LocationProbability(countryCode, mapDefinition, "N/A");
@@ -134,8 +148,10 @@ public static class DistributionStrategies
         var filteredLocations = locations
             .GroupBy(x => Hasher.Encode(x.Lat, x.Lng, HashPrecision.Size_km_1x1))
             .AsParallel()
-            .SelectMany(x => LocationDistributor.GetSome<Loc, long>([.. x], (120_000m / files.Length).RoundToInt(), minDistance / 2, locationProbability))
+            .WithDegreeOfParallelism(GenerationConcurrency.InnerDegreeOfParallelism())
+            .SelectMany(x => LocationDistributor.GetSome<Loc, long>([.. x], (120_000m / files.Length).RoundToInt(), minDistance / 2, locationProbability, avoidShuffle: GenerationDeterminism.Deterministic))
             .ToArray();
+        filteredLocations = GenerationDeterminism.InCanonicalOrder(filteredLocations).ToArray();
         return [LocationsByCoverageDensity(countryCode, mapDefinition, filteredLocations, goalCount, neighborLocationBuckets, minDistance, "N/A")];
     }
 
@@ -172,13 +188,6 @@ public static class DistributionStrategies
             var tuple = ByMaxMinDistance(locationCluster.Locations, count, neighborLocationBuckets, minDistance, mapDefinition, countryCode, subdivision);
             resultLocations.AddRange(tuple.locations);
             resultMinDistance = Math.Min(tuple.minDistance, resultMinDistance);
-        }
-
-        var diff = regionGoalCount - resultLocations.Count;
-        var notEnoughLocationsMessage = diff > 0 ? $"[olive]{diff,4} locations short.[/]" : "";
-        if (!ConsoleLogger.Silent)
-        {
-            AnsiConsole.MarkupLine($"[lightseagreen]{resultLocations.Count,6:N0} locations in {subdivision,7}. At least {resultMinDistance,7:N0}m. between each location.[/]{notEnoughLocationsMessage}");
         }
 
         return (resultLocations, regionGoalCount, resultMinDistance);
@@ -218,14 +227,29 @@ public static class DistributionStrategies
             return [([], 0, 0)];
         }
 
-        var neighborLocationBuckets = LocationLookupService.Bucketize(allLocations, mapDefinition.HashPrecisionFromNeighborFiltersRadius());
+        Dictionary<ulong, List<Loc>> neighborLocationBuckets;
+        using (GenPerf.Measure(GenPerf.Phase.Bucketize))
+        {
+            neighborLocationBuckets = LocationLookupService.Bucketize(allLocations, mapDefinition.HashPrecisionFromNeighborFiltersRadius());
+        }
+
         var proximityFilter = ProximityFilter(countryCode, mapDefinition, "N/A");
         var locationsFromFile = LocationReader.DeserializeLocationsFromFile(proximityFilter.LocationsPath);
-        var proximityLocationBuckets = LocationLookupService.Bucketize<ILatLng>(locationsFromFile, proximityFilter.HashPrecisionFromProximityFilter());
-        var locations = FilteredLocations(countryCode, mapDefinition, "", allLocations, neighborLocationBuckets, proximityLocationBuckets, proximityFilter);
+        Dictionary<ulong, List<ILatLng>> proximityLocationBuckets;
+        using (GenPerf.Measure(GenPerf.Phase.Bucketize))
+        {
+            proximityLocationBuckets = LocationLookupService.Bucketize<ILatLng>(locationsFromFile, proximityFilter.HashPrecisionFromProximityFilter());
+        }
+
+        Loc[] locations;
+        using (GenPerf.Measure(GenPerf.Phase.Filter))
+        {
+            locations = FilteredLocations(countryCode, mapDefinition, "", allLocations, neighborLocationBuckets, proximityLocationBuckets, proximityFilter);
+        }
+
         if (locations.Length == 0)
         {
-            return [([], 0, 0)];
+            return [([], goalCount, 0)];
         }
 
         var locationProbability = LocationProbability(countryCode, mapDefinition, "N/A");
@@ -233,16 +257,15 @@ public static class DistributionStrategies
         var filteredLocations = locations
             .GroupBy(x => Hasher.Encode(x.Lat, x.Lng, HashPrecision.Size_km_1x1))
             .AsParallel()
-            .SelectMany(x => LocationDistributor.GetSome<Loc, long>([.. x], (120_000m/files.Length).RoundToInt(), minDistance / 2, locationProbability))
+            .WithDegreeOfParallelism(GenerationConcurrency.InnerDegreeOfParallelism())
+            .SelectMany(x => LocationDistributor.GetSome<Loc, long>([.. x], (120_000m/files.Length).RoundToInt(), minDistance / 2, locationProbability, avoidShuffle: GenerationDeterminism.Deterministic))
             .ToArray();
-        var tuple = ByMaxMinDistance(filteredLocations, goalCount, neighborLocationBuckets, minDistance, mapDefinition, countryCode, "");
-        var diff = goalCount - tuple.locations.Count;
-        var notEnoughLocationsMessage = diff > 0 ? $"[olive]{diff,4} locations short.[/]" : "";
-        if (!ConsoleLogger.Silent)
+        filteredLocations = GenerationDeterminism.InCanonicalOrder(filteredLocations).ToArray();
+        (IList<Loc> locations, int minDistance) tuple;
+        using (GenPerf.Measure(GenPerf.Phase.Distribute))
         {
-            AnsiConsole.MarkupLine($"[lightseagreen]Generated {tuple.locations.Count,6:N0} locations in {countryCode}. At least {tuple.minDistance,7:N0}m. between each location.[/]{notEnoughLocationsMessage}");
+            tuple = ByMaxMinDistance(filteredLocations, goalCount, neighborLocationBuckets, minDistance, mapDefinition, countryCode, "");
         }
-
         return [(tuple.locations, goalCount, tuple.minDistance)];
     }
 
@@ -301,7 +324,7 @@ public static class DistributionStrategies
                 }
 
                 var locationProbability = LocationProbability(countryCode, mapDefinition, subdivision);
-                var subdivisionLocations = LocationDistributor.GetSome<Location, long>(subdivisionAvailableLocations, subdivisionGoalCount, fixedMinDistance, locationProbability);
+                var subdivisionLocations = LocationDistributor.GetSome<Location, long>(subdivisionAvailableLocations, subdivisionGoalCount, fixedMinDistance, locationProbability, avoidShuffle: GenerationDeterminism.Deterministic);
                 if (subdivisionLocations.Count < subdivisionGoalCount)
                 {
                     triedGoalCounts.Add((totalGoalCount, Status.Fail));
@@ -321,13 +344,9 @@ public static class DistributionStrategies
                 break;
             }
 
-            Console.WriteLine($"Old goal count: {totalGoalCount,7}");
-            Console.WriteLine(triedGoalCounts.Select(x => $"{x.status,8} | {x.count,7}").Merge(Environment.NewLine));
-
             var newGoalCount = triedGoalCounts.Any(x => x.status == Status.Success)
                 ? LargestSuccessCount() + (triedGoalCounts.Where(x => x.status == Status.Fail && x.count > LargestSuccessCount()).MinBy(x => x.count).count - LargestSuccessCount()) / 2
                 : triedGoalCounts.MinBy(x => x.count).count / 2;
-            Console.WriteLine($"New goal count: {newGoalCount,7}");
 
             totalGoalCount = newGoalCount;
         }
@@ -354,97 +373,38 @@ public static class DistributionStrategies
         }
     }
 
-    public static async Task<(IList<Loc> locations, int regionGoalCount, int minDistance)[]> EvenlyByDistanceInCountry(
+    public static (IList<Loc> locations, int regionGoalCount, int minDistance)[] EvenlyByDistanceInCountry(
         string countryCode,
         string[] files,
         string[] availableSubdivisions,
-        MapDefinition mapDefinition,
-        int parallelism)
-    {
-        var filteredByFile = await files.RunLimitedNumberAtATime(
-            file => FilterLocationsForSubdivision(file, countryCode, availableSubdivisions, mapDefinition),
-            parallelism);
-
-        var allAvailableLocations = filteredByFile.SelectMany(x => x).ToList();
-        var minDistanceBetweenLocations = mapDefinition.DistributionStrategy.FixedMinDistance;
-        var locationProbability = LocationProbability(countryCode, mapDefinition, "N/A");
-        var locations = LocationDistributor.DistributeEvenly<Loc, long>(allAvailableLocations, minDistanceBetweenLocations, locationProbability);
-        return [(locations, -1, minDistanceBetweenLocations)];
-    }
-
-    private static Loc[] FilterLocationsForSubdivision(
-        string file,
-        string countryCode,
-        string[] availableSubdivisions,
         MapDefinition mapDefinition)
     {
-        // Neighbor filter 需要整個行政區的點做鄰居查詢，無法分塊處理，只能整檔讀入
-        if (mapDefinition.NeighborFilters.Any())
+        var allAvailableLocations = new List<Loc>();
+        foreach (var file in files)
         {
             var deserializeFromFile = ReadFromFile(file, mapDefinition, countryCode);
-            var subdivisionCode = deserializeFromFile.FirstOrDefault()?.Nominatim.SubdivisionCode ?? "";
-            if (string.IsNullOrEmpty(subdivisionCode) || !availableSubdivisions.Contains(subdivisionCode))
+            var subdivision = deserializeFromFile.First().Nominatim.SubdivisionCode;
+            if (string.IsNullOrEmpty(subdivision))
             {
-                return [];
+                continue;
             }
 
-            var filter = LocationFilter(countryCode, mapDefinition, subdivisionCode);
-            var proximity = ProximityFilter(countryCode, mapDefinition, subdivisionCode);
-            var proximityLocations = LocationReader.DeserializeLocationsFromFile(proximity.LocationsPath);
-            var proximityBuckets = LocationLookupService.Bucketize<ILatLng>(proximityLocations, proximity.HashPrecisionFromProximityFilter());
+            var locationFilter = LocationFilter(countryCode, mapDefinition, subdivision);
+            var proximityFilter = ProximityFilter(countryCode, mapDefinition, subdivision);
+            var locationsFromFile = LocationReader.DeserializeLocationsFromFile(proximityFilter.LocationsPath);
+            var proximityLocationBuckets = LocationLookupService.Bucketize<ILatLng>(locationsFromFile, proximityFilter.HashPrecisionFromProximityFilter());
+
             var neighborLocationBuckets = LocationLookupService.Bucketize(deserializeFromFile, mapDefinition.HashPrecisionFromNeighborFiltersRadius());
-            var geometries = GeometryFilters(countryCode, mapDefinition, subdivisionCode).GetApplicableGeometryFilters();
-            return LocationLakeFilterer.Filter(deserializeFromFile, neighborLocationBuckets, proximityBuckets, filter, proximity, geometries, mapDefinition.NeighborFilters, mapDefinition);
+            var geometryFilters = GeometryFilters(countryCode, mapDefinition, subdivision).GetApplicableGeometryFilters();
+            allAvailableLocations.AddRange(availableSubdivisions.Contains(subdivision)
+                ? LocationLakeFilterer.Filter(deserializeFromFile, neighborLocationBuckets, proximityLocationBuckets, locationFilter, proximityFilter, geometryFilters, mapDefinition.NeighborFilters, mapDefinition)
+                : []);
         }
 
-        // 串流分塊讀取並過濾，記憶體用量只跟過濾後留下的點數成正比，大型 bin 檔不會 OOM
-        const int chunkSize = 50_000;
-        using var stream = File.OpenRead(file);
-        using var items = ProtoBuf.Serializer.DeserializeItems<Loc>(stream, ProtoBuf.PrefixStyle.Base128, 1).GetEnumerator();
-        if (!items.MoveNext())
-        {
-            return [];
-        }
-
-        var subdivision = items.Current.Nominatim.SubdivisionCode;
-        if (string.IsNullOrEmpty(subdivision) || !availableSubdivisions.Contains(subdivision))
-        {
-            return [];
-        }
-
-        var locationFilter = LocationFilter(countryCode, mapDefinition, subdivision);
-        var proximityFilter = ProximityFilter(countryCode, mapDefinition, subdivision);
-        var locationsFromFile = LocationReader.DeserializeLocationsFromFile(proximityFilter.LocationsPath);
-        var proximityLocationBuckets = LocationLookupService.Bucketize<ILatLng>(locationsFromFile, proximityFilter.HashPrecisionFromProximityFilter());
-        var geometryFilters = GeometryFilters(countryCode, mapDefinition, subdivision).GetApplicableGeometryFilters();
-        var emptyNeighborBuckets = new Dictionary<ulong, List<Loc>>();
-
-        var result = new List<Loc>();
-        var chunk = new List<Loc>(chunkSize) { items.Current };
-        while (items.MoveNext())
-        {
-            chunk.Add(items.Current);
-            if (chunk.Count >= chunkSize)
-            {
-                FilterChunk();
-            }
-        }
-
-        FilterChunk();
-        return [.. result];
-
-        void FilterChunk()
-        {
-            if (chunk.Count == 0)
-            {
-                return;
-            }
-
-            var locations = chunk.ToArray();
-            MergeExternalDataFiles(locations, mapDefinition, countryCode);
-            result.AddRange(LocationLakeFilterer.Filter(locations, emptyNeighborBuckets, proximityLocationBuckets, locationFilter, proximityFilter, geometryFilters, mapDefinition.NeighborFilters, mapDefinition));
-            chunk.Clear();
-        }
+        var minDistanceBetweenLocations = mapDefinition.DistributionStrategy.FixedMinDistance;
+        var locationProbability = LocationProbability(countryCode, mapDefinition, "N/A");
+        var locations = LocationDistributor.DistributeEvenly<Loc, long>(allAvailableLocations, minDistanceBetweenLocations, locationProbability, avoidShuffle: GenerationDeterminism.Deterministic, silent: true);
+        return [(locations, -1, minDistanceBetweenLocations)];
     }
 
     private static (IList<Loc> locations, int minDistance) ByMaxMinDistance(
@@ -488,7 +448,7 @@ public static class DistributionStrategies
                     : (regionGoalCount * locationPreferenceFilter.Percentage / 100m).Value.RoundToInt();
                 var minMinDistance = locationPreferenceFilter.MinMinDistance ?? minDistance;
                 IReadOnlyCollection<ILatLng> locationsAlreadyInMap = combinedLocationsForMap ?? (IReadOnlyCollection<ILatLng>)locations;
-                var withMaxMinDistance = LocationDistributor.WithMaxMinDistance<Loc, long>(filtered, goalCount, minMinDistance: minMinDistance, locationsAlreadyInMap: locationsAlreadyInMap, locationProbability: locationProbability);
+                var withMaxMinDistance = LocationDistributor.WithMaxMinDistance<Loc, long>(filtered, goalCount, minMinDistance: minMinDistance, locationsAlreadyInMap: locationsAlreadyInMap, locationProbability: locationProbability, avoidShuffle: GenerationDeterminism.Deterministic);
                 lastMinMinDistance = withMaxMinDistance.minDistance;
                 IEnumerable<Loc> locationsFromPreference = withMaxMinDistance.locations;
                 if (!string.IsNullOrEmpty(locationPreferenceFilter.LocationTag))
@@ -510,7 +470,7 @@ public static class DistributionStrategies
             return (locations, lastMinMinDistance);
         }
 
-        return LocationDistributor.WithMaxMinDistance<Loc, long>(filteredLocations, regionGoalCount, minMinDistance: minDistance, locationsAlreadyInMap: usedLocations, locationProbability: locationProbability);
+        return LocationDistributor.WithMaxMinDistance<Loc, long>(filteredLocations, regionGoalCount, minMinDistance: minDistance, locationsAlreadyInMap: usedLocations, locationProbability: locationProbability, avoidShuffle: GenerationDeterminism.Deterministic);
     }
 
     private static string? LocationFilter(string countryCode, MapDefinition mapDefinition, string subdivision)
@@ -529,30 +489,45 @@ public static class DistributionStrategies
         return locationFilter;
     }
 
+    private static readonly ConcurrentDictionary<string, Lazy<Dictionary<string, Dictionary<string, string>>>> ExternalDataCache = new();
+
     private static Loc[] ReadFromFile(string file, MapDefinition mapDefinition, string countryCode)
     {
-        var locations = Extensions.ProtoDeserializeFromFile<Loc[]>(file);
-        MergeExternalDataFiles(locations, mapDefinition, countryCode);
-        return locations;
-    }
+        Loc[] locations;
+        var leanModel = LeanLocationModel.For(mapDefinition);
+        using (GenPerf.Measure(GenPerf.Phase.Deserialize))
+        {
+            locations = leanModel is null
+                ? Extensions.ProtoDeserializeFromFile<Loc[]>(file)
+                : Extensions.ProtoDeserializeFromFile<Loc[]>(file, leanModel);
+        }
 
-    private static void MergeExternalDataFiles(Loc[] locations, MapDefinition mapDefinition, string countryCode)
-    {
         if (mapDefinition.GlobalExternalDataFiles.Length > 0)
         {
-            MergeExternalData(locations, mapDefinition.GlobalExternalDataFiles);
+            using (GenPerf.Measure(GenPerf.Phase.ExternalMerge))
+            {
+                MergeExternalData(locations, mapDefinition.GlobalExternalDataFiles);
+            }
         }
 
         if (mapDefinition.CountryExternalDataFiles.TryGetValue(countryCode, out var externalFiles) && externalFiles.Length > 0)
         {
-            MergeExternalData(locations, externalFiles);
+            using (GenPerf.Measure(GenPerf.Phase.ExternalMerge))
+            {
+                MergeExternalData(locations, externalFiles);
+            }
         }
+
+        return locations;
 
         static void MergeExternalData(Loc[] locations, string[] externalFiles)
         {
             foreach (var externalDataFile in externalFiles)
             {
-                var externalData = Extensions.TryJsonDeserializeFromFile<Dictionary<string, Dictionary<string, string>>>(externalDataFile, []);
+                var externalData = ExternalDataCache.GetOrAdd(
+                    externalDataFile,
+                    static file => new Lazy<Dictionary<string, Dictionary<string, string>>>(
+                        () => Extensions.TryJsonDeserializeFromFile<Dictionary<string, Dictionary<string, string>>>(file, []))).Value;
                 foreach (var location in locations)
                 {
                     if (externalData.TryGetValue(location.LocationId.ToString(), out var data))
