@@ -382,29 +382,91 @@ public static class DistributionStrategies
         var allAvailableLocations = new List<Loc>();
         foreach (var file in files)
         {
-            var deserializeFromFile = ReadFromFile(file, mapDefinition, countryCode);
-            var subdivision = deserializeFromFile.First().Nominatim.SubdivisionCode;
-            if (string.IsNullOrEmpty(subdivision))
-            {
-                continue;
-            }
-
-            var locationFilter = LocationFilter(countryCode, mapDefinition, subdivision);
-            var proximityFilter = ProximityFilter(countryCode, mapDefinition, subdivision);
-            var locationsFromFile = LocationReader.DeserializeLocationsFromFile(proximityFilter.LocationsPath);
-            var proximityLocationBuckets = LocationLookupService.Bucketize<ILatLng>(locationsFromFile, proximityFilter.HashPrecisionFromProximityFilter());
-
-            var neighborLocationBuckets = LocationLookupService.Bucketize(deserializeFromFile, mapDefinition.HashPrecisionFromNeighborFiltersRadius());
-            var geometryFilters = GeometryFilters(countryCode, mapDefinition, subdivision).GetApplicableGeometryFilters();
-            allAvailableLocations.AddRange(availableSubdivisions.Contains(subdivision)
-                ? LocationLakeFilterer.Filter(deserializeFromFile, neighborLocationBuckets, proximityLocationBuckets, locationFilter, proximityFilter, geometryFilters, mapDefinition.NeighborFilters, mapDefinition)
-                : []);
+            allAvailableLocations.AddRange(FilterLocationsForSubdivision(file, countryCode, availableSubdivisions, mapDefinition));
         }
 
         var minDistanceBetweenLocations = mapDefinition.DistributionStrategy.FixedMinDistance;
         var locationProbability = LocationProbability(countryCode, mapDefinition, "N/A");
         var locations = LocationDistributor.DistributeEvenly<Loc, long>(allAvailableLocations, minDistanceBetweenLocations, locationProbability, avoidShuffle: GenerationDeterminism.Deterministic, silent: true);
         return [(locations, -1, minDistanceBetweenLocations)];
+    }
+
+    private static Loc[] FilterLocationsForSubdivision(
+        string file,
+        string countryCode,
+        string[] availableSubdivisions,
+        MapDefinition mapDefinition)
+    {
+        // Neighbor filter 需要整個行政區的點做鄰居查詢，無法分塊處理，只能整檔讀入
+        if (mapDefinition.NeighborFilters.Any())
+        {
+            var deserializeFromFile = ReadFromFile(file, mapDefinition, countryCode);
+            var subdivisionCode = deserializeFromFile.FirstOrDefault()?.Nominatim.SubdivisionCode ?? "";
+            if (string.IsNullOrEmpty(subdivisionCode) || !availableSubdivisions.Contains(subdivisionCode))
+            {
+                return [];
+            }
+
+            var filter = LocationFilter(countryCode, mapDefinition, subdivisionCode);
+            var proximity = ProximityFilter(countryCode, mapDefinition, subdivisionCode);
+            var proximityLocations = LocationReader.DeserializeLocationsFromFile(proximity.LocationsPath);
+            var proximityBuckets = LocationLookupService.Bucketize<ILatLng>(proximityLocations, proximity.HashPrecisionFromProximityFilter());
+            var neighborLocationBuckets = LocationLookupService.Bucketize(deserializeFromFile, mapDefinition.HashPrecisionFromNeighborFiltersRadius());
+            var geometries = GeometryFilters(countryCode, mapDefinition, subdivisionCode).GetApplicableGeometryFilters();
+            return LocationLakeFilterer.Filter(deserializeFromFile, neighborLocationBuckets, proximityBuckets, filter, proximity, geometries, mapDefinition.NeighborFilters, mapDefinition);
+        }
+
+        // 串流分塊讀取並過濾，記憶體用量只跟過濾後留下的點數成正比，大型 bin 檔不會 OOM
+        const int chunkSize = 50_000;
+        var leanModel = LeanLocationModel.For(mapDefinition);
+        using var stream = File.OpenRead(file);
+        using var items = (leanModel is null
+            ? ProtoBuf.Serializer.DeserializeItems<Loc>(stream, ProtoBuf.PrefixStyle.Base128, 1)
+            : leanModel.DeserializeItems<Loc>(stream, ProtoBuf.PrefixStyle.Base128, 1)).GetEnumerator();
+        if (!items.MoveNext())
+        {
+            return [];
+        }
+
+        var subdivision = items.Current.Nominatim.SubdivisionCode;
+        if (string.IsNullOrEmpty(subdivision) || !availableSubdivisions.Contains(subdivision))
+        {
+            return [];
+        }
+
+        var locationFilter = LocationFilter(countryCode, mapDefinition, subdivision);
+        var proximityFilter = ProximityFilter(countryCode, mapDefinition, subdivision);
+        var locationsFromFile = LocationReader.DeserializeLocationsFromFile(proximityFilter.LocationsPath);
+        var proximityLocationBuckets = LocationLookupService.Bucketize<ILatLng>(locationsFromFile, proximityFilter.HashPrecisionFromProximityFilter());
+        var geometryFilters = GeometryFilters(countryCode, mapDefinition, subdivision).GetApplicableGeometryFilters();
+        var emptyNeighborBuckets = new Dictionary<ulong, List<Loc>>();
+
+        var result = new List<Loc>();
+        var chunk = new List<Loc>(chunkSize) { items.Current };
+        while (items.MoveNext())
+        {
+            chunk.Add(items.Current);
+            if (chunk.Count >= chunkSize)
+            {
+                FilterChunk();
+            }
+        }
+
+        FilterChunk();
+        return [.. result];
+
+        void FilterChunk()
+        {
+            if (chunk.Count == 0)
+            {
+                return;
+            }
+
+            var locations = chunk.ToArray();
+            MergeExternalDataFiles(locations, mapDefinition, countryCode);
+            result.AddRange(LocationLakeFilterer.Filter(locations, emptyNeighborBuckets, proximityLocationBuckets, locationFilter, proximityFilter, geometryFilters, mapDefinition.NeighborFilters, mapDefinition));
+            chunk.Clear();
+        }
     }
 
     private static (IList<Loc> locations, int minDistance) ByMaxMinDistance(
@@ -502,6 +564,12 @@ public static class DistributionStrategies
                 : Extensions.ProtoDeserializeFromFile<Loc[]>(file, leanModel);
         }
 
+        MergeExternalDataFiles(locations, mapDefinition, countryCode);
+        return locations;
+    }
+
+    private static void MergeExternalDataFiles(Loc[] locations, MapDefinition mapDefinition, string countryCode)
+    {
         if (mapDefinition.GlobalExternalDataFiles.Length > 0)
         {
             using (GenPerf.Measure(GenPerf.Phase.ExternalMerge))
@@ -517,8 +585,6 @@ public static class DistributionStrategies
                 MergeExternalData(locations, externalFiles);
             }
         }
-
-        return locations;
 
         static void MergeExternalData(Loc[] locations, string[] externalFiles)
         {
