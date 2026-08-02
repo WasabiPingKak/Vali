@@ -76,8 +76,8 @@ output 兩個設定的用途:
 
 ## Filter 條件摘要
 
-1. **`globalLocationFilter`**:`Buildings200 gte 3 and Roads0 gte 2`
-   - 200m 內至少 3 棟建築 + 至少在 2 條路交會處
+1. **`globalLocationFilter`**:`Buildings200 gte 3`(200m 內至少 3 棟建築)
+   - 原本另有 `Roads0 gte 2`(限定路口),2026-08 移除:OSM 路網稀疏的國家(BT 等)會被誤殺,放寬後小國點池明顯變大
 2. **`enableDefaultLocationFilters: true`** 啟用的預設 filter:
    - 排隧道（`Tunnels10 == 0`）
    - 排壞圖（無 description 且非 Scout 的 coverage）
