@@ -1,0 +1,26 @@
+{
+  "countryCodes": [
+    "MY"
+  ],
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 100
+  },
+  "globalLocationFilter": "Buildings200 gte 3 and Roads0 gte 2",
+  "enableDefaultLocationFilters": true,
+  "geometryFilters": [
+    {
+      "filePath": "maps/A Starter World 入門的世界/亞洲/my.geojson",
+      "inclusionMode": "include",
+      "combinationMode": "union"
+    }
+  ],
+  "output": {
+    "locationTags": [
+      "CountryCode"
+    ],
+    "panoIdCountryCodes": [
+      "*"
+    ]
+  }
+}
