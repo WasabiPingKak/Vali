@@ -141,6 +141,7 @@ public static class CountryCodes
         { "UZ", "Uzbekistan" },
         { "VE", "Venezuela" },
         { "VN", "Vietnam" },
+        { "XK", "Kosovo" },
         { "YE", "Yemen" },
         { "ZA", "South Africa" },
         { "ZW", "Zimbabwe" },
