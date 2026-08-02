@@ -189,6 +189,10 @@
 - Kyiv 基輔 — 首都
 - Odesa 敖德薩 — 黑海港城
 
+### XK Kosovo 科索沃
+- Pristina 普里斯提納 — 首都
+- 註:XK 是暫定代碼(Kosovo 無正式 ISO 代碼),Vali 於 2026-07 起支援
+
 ## 亞洲
 
 ### AE United Arab Emirates 阿拉伯聯合大公國
