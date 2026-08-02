@@ -385,6 +385,9 @@ public static class DistributionStrategies
             allAvailableLocations.AddRange(FilterLocationsForSubdivision(file, countryCode, availableSubdivisions, mapDefinition));
         }
 
+        // 增量更新可能讓同一點出現在多個行政區檔,跨檔去重避免下游以 NodeId 為 key 時崩潰
+        allAvailableLocations = allAvailableLocations.DistinctBy(x => x.NodeId).ToList();
+
         var minDistanceBetweenLocations = mapDefinition.DistributionStrategy.FixedMinDistance;
         var locationProbability = LocationProbability(countryCode, mapDefinition, "N/A");
         var locations = LocationDistributor.DistributeEvenly<Loc, long>(allAvailableLocations, minDistanceBetweenLocations, locationProbability, avoidShuffle: GenerationDeterminism.Deterministic, silent: true);
