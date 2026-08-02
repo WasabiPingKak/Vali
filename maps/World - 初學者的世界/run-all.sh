@@ -37,7 +37,8 @@ run_country() {
     { "filePath": "${MAP_DIR}/${continent}/${cc_file}.geojson", "inclusionMode": "include", "combinationMode": "union" }
   ],
   "output": {
-    "locationTags": ["CountryCode"]
+    "locationTags": ["CountryCode"],
+    "panoIdCountryCodes": ["*"]
   }
 }
 EOFCFG

@@ -41,8 +41,9 @@
 
 ### DE Germany 德國
 - Berlin 柏林 — 首都
-
 - Hamburg 漢堡 — 北部港城
+- Munich 慕尼黑 — 南部大城
+- Frankfurt 法蘭克福 — 金融中心
 
 ### DK Denmark 丹麥
 - Copenhagen 哥本哈根 — 首都
@@ -55,6 +56,7 @@
 ### ES Spain 西班牙
 - Madrid 馬德里 — 首都
 - Barcelona 巴塞隆納 — 加泰隆尼亞
+- Valencia 瓦倫西亞 — 東岸第三大城
 
 
 ### FI Finland 芬蘭
@@ -68,11 +70,14 @@
 ### FR France 法國
 - Paris 巴黎 — 首都
 - Lyon 里昂 — 中部大城
+- Marseille 馬賽 — 地中海港城
 
 
 ### GB United Kingdom 英國
 - London 倫敦 — 首都
 - Manchester 曼徹斯特 — 英格蘭北部
+- Edinburgh 愛丁堡 — 蘇格蘭首府
+- Belfast 貝爾法斯特 — 北愛爾蘭首府
 
 ### GR Greece 希臘
 - Athens 雅典 — 首都
@@ -99,6 +104,8 @@
 ### IT Italy 義大利
 - Rome 羅馬 — 首都
 - Milan 米蘭 — 北部商業中心
+- Naples 拿坡里 — 南部大城
+- Palermo 巴勒摩 — 西西里島
 
 ### LI Liechtenstein 列支敦士登
 - 整國（微型國）
@@ -132,6 +139,7 @@
 ### NL Netherlands 荷蘭
 - Amsterdam 阿姆斯特丹 — 首都
 - Rotterdam 鹿特丹 — 現代港都
+- The Hague 海牙 — 政府所在地
 
 ### NO Norway 挪威
 - Oslo 奧斯陸 — 首都
@@ -209,7 +217,6 @@
 
 ### IL Israel 以色列
 - Tel Aviv 特拉維夫 — 商業中心
-- Jerusalem 耶路撒冷 — 聖城
 - Haifa 海法 — 北部港城
 
 ### IN India 印度
@@ -225,6 +232,7 @@
 ### JP Japan 日本
 - Tokyo 東京 — 首都
 - Osaka 大阪 — 關西大城
+- Kyoto 京都 — 古都
 - Sapporo 札幌 — 北海道
 - Fukuoka 福岡 — 九州大城
 - Okinawa 沖繩 — 琉球群島
@@ -262,7 +270,7 @@
 
 ### MN Mongolia 蒙古
 - Ulaanbaatar 烏蘭巴托 — 首都
-- Khovd 科布多 — 西部大城
+
 
 ### MO Macao 澳門
 - 整區（城邦）
@@ -270,6 +278,7 @@
 ### MY Malaysia 馬來西亞
 - Kuala Lumpur 吉隆坡 — 首都
 - Penang 檳城 — 北部島嶼城市
+- Johor Bahru 新山 — 南部,新加坡對岸
 - Kota Kinabalu 亞庇 — 東馬沙巴
 - Kuching 古晉 — 東馬砂拉越
 
@@ -367,6 +376,7 @@
 ### TN Tunisia 突尼西亞
 - Tunis 突尼斯 — 首都
 - Sousse 蘇斯 — 海岸觀光城
+- Monastir 莫納斯提爾 — 蘇斯南邊海岸城
 
 ### UG Uganda 烏干達
 - Kampala 坎帕拉 — 首都
@@ -416,9 +426,6 @@
 - Guadalajara 瓜達拉哈拉 — 西部大城
 - Monterrey 蒙特雷 — 東北部工業城
 
-### MP Northern Mariana Islands 北馬里亞納群島
-- Saipan 塞班島 — 首府（小島）
-
 ### PA Panama 巴拿馬
 - Panama City 巴拿馬城 — 首都
 - Colón 科隆 — 運河大西洋端
@@ -453,7 +460,7 @@
 ### BR Brazil 巴西
 - São Paulo 聖保羅 — 最大城
 - Rio de Janeiro 里約熱內盧 — 海岸大城
-- Brasília 巴西利亞 — 首都
+- Brasília 巴西利亞 — (手選)
 - Salvador 薩爾瓦多 — 東北部
 - Manaus 瑪瑙斯 — 亞馬遜雨林大城
 
