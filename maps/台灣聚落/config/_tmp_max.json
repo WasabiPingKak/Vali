@@ -1,0 +1,15 @@
+{
+  "countryCodes": ["TW"],
+  "distributionStrategy": {
+    "key": "FixedCountByCoverageDensity",
+    "locationCountGoal": 100000,
+    "minMinDistance": 150,
+    "coverageDensityTuningFactor": 0.7,
+    "treatCountriesAsSingleSubdivision": ["TW"]
+  },
+  "subdivisionInclusions": { "TW": ["TW-KHH"] },
+  "globalLocationFilter": "Buildings200 gte 4 and Roads0 gte 2",
+  "output": {
+    "locationTags": ["Buildings200", "Roads0", "SubdivisionCode"]
+  }
+}

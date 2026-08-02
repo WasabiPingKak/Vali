@@ -1,0 +1,22 @@
+{
+  "countryCodes": ["TW"],
+  "distributionStrategy": {
+    "key": "FixedCountByCoverageDensity",
+    "locationCountGoal": 2000,
+    "minMinDistance": 150,
+    "coverageDensityTuningFactor": 0.7
+  },
+  "subdivisionInclusions": { "TW": ["TW-HSQ", "TW-HSZ", "TW-CYQ", "TW-CYI"] },
+  "subdivisionDistribution": {
+    "TW": {
+      "TW-HSQ": 629,
+      "TW-HSZ": 371,
+      "TW-CYQ": 676,
+      "TW-CYI": 324
+    }
+  },
+  "globalLocationFilter": "Buildings200 gte 4 and Roads0 gte 2",
+  "output": {
+    "locationTags": ["Buildings200", "Roads0", "SubdivisionCode"]
+  }
+}

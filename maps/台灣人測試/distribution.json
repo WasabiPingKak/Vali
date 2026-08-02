@@ -2,11 +2,11 @@
     "regions": [
         {
             "code": "TW-TPE",
-            "count": 81
+            "count": 82
         },
         {
             "code": "TW-KHH",
-            "count": 48
+            "count": 49
         },
         {
             "code": "TW-TXG",
@@ -14,11 +14,11 @@
         },
         {
             "code": "TW-TNN",
-            "count": 37
+            "count": 38
         },
         {
             "code": "TW-NWT",
-            "count": 35
+            "count": 33
         },
         {
             "code": "TW-TTT",
@@ -26,7 +26,7 @@
         },
         {
             "code": "TW-PIF",
-            "count": 25
+            "count": 26
         },
         {
             "code": "TW-TAO",
@@ -69,19 +69,19 @@
             "count": 9
         },
         {
-            "code": "TW-PEN",
-            "count": 8
-        },
-        {
             "code": "TW-HSQ",
             "count": 8
         },
         {
-            "code": "TW-KIN",
-            "count": 7
+            "code": "TW-PEN",
+            "count": 8
         },
         {
             "code": "TW-KEE",
+            "count": 8
+        },
+        {
+            "code": "TW-KIN",
             "count": 7
         },
         {

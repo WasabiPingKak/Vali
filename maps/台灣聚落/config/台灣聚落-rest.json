@@ -1,0 +1,42 @@
+{
+  "countryCodes": ["TW"],
+  "distributionStrategy": {
+    "key": "FixedCountByCoverageDensity",
+    "locationCountGoal": 14257,
+    "minMinDistance": 150,
+    "coverageDensityTuningFactor": 0.7
+  },
+  "subdivisionInclusions": {
+    "TW": [
+      "TW-CHA", "TW-HUA", "TW-ILA", "TW-KEE", "TW-KHH", "TW-KIN", "TW-LIE",
+      "TW-MIA", "TW-NAN", "TW-NWT", "TW-PEN", "TW-PIF", "TW-TAO", "TW-TNN",
+      "TW-TPE", "TW-TTT", "TW-TXG", "TW-YUN"
+    ]
+  },
+  "subdivisionDistribution": {
+    "TW": {
+      "TW-CHA": 1000,
+      "TW-HUA": 1000,
+      "TW-ILA": 917,
+      "TW-KEE": 435,
+      "TW-KHH": 1000,
+      "TW-KIN": 151,
+      "TW-LIE": 28,
+      "TW-MIA": 1000,
+      "TW-NAN": 1000,
+      "TW-NWT": 1000,
+      "TW-PEN": 185,
+      "TW-PIF": 1000,
+      "TW-TAO": 1000,
+      "TW-TNN": 1000,
+      "TW-TPE": 1000,
+      "TW-TTT": 560,
+      "TW-TXG": 1000,
+      "TW-YUN": 981
+    }
+  },
+  "globalLocationFilter": "Buildings200 gte 4 and Roads0 gte 2",
+  "output": {
+    "locationTags": ["Buildings200", "Roads0", "SubdivisionCode"]
+  }
+}
