@@ -4,9 +4,9 @@
 
 低難度世界市區圖，113 個國家/地區，每國只框 1~7 個主要城市（用 geojson 多邊形）。目標是讓初學者在熟悉的城市環境中練習辨識國家。
 
-## 目前狀態（2026-08-03）
+## 目前狀態（2026-08-04）
 
-**108 國已全部產出點位**，結果在 `locations/{cc}.json`（檔名用 geojson 命名，英國是 `uk.json`）。各國 Vali 設定在 `config/{cc}.json`，各國點數統計見 `point-counts.md`。
+**110 國已全部產出點位**(含 2026-08 補收錄的 AL 阿爾巴尼亞)，結果在 `locations/{cc}.json`（檔名用 geojson 命名，英國是 `uk.json`）。各國 Vali 設定在 `config/{cc}.json`，各國點數統計見 `point-counts.md`。
 
 最終匯入檔:`A Starter World 入門的世界.json` = 40,000 自動配額點 + 68 手選點 = **40,068 點**,絕大多數鎖定官方 panoId。
 
@@ -38,7 +38,7 @@
     "key": "EvenlyByDistanceWithinCountry",
     "fixedMinDistance": 100
   },
-  "globalLocationFilter": "Buildings200 gte 3 and Roads0 gte 2",
+  "globalLocationFilter": "Buildings200 gte 3",
   "enableDefaultLocationFilters": true,
   "geometryFilters": [
     { "filePath": "maps/A Starter World 入門的世界/洲名/xx.geojson", "inclusionMode": "include", "combinationMode": "union" }

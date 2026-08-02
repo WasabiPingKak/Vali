@@ -31,7 +31,7 @@ run_country() {
     "key": "EvenlyByDistanceWithinCountry",
     "fixedMinDistance": 100
   },
-  "globalLocationFilter": "Buildings200 gte 3 and Roads0 gte 2",
+  "globalLocationFilter": "Buildings200 gte 3",
   "enableDefaultLocationFilters": true,
   "geometryFilters": [
     { "filePath": "${MAP_DIR}/${continent}/${cc_file}.geojson", "inclusionMode": "include", "combinationMode": "union" }

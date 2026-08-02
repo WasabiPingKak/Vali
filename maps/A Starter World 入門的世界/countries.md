@@ -7,6 +7,11 @@
 ### AD Andorra 安道爾
 - 整國（微型國，山谷小鎮為主）
 
+### AL Albania 阿爾巴尼亞
+- Tirana 地拉那 — 首都
+- Vlorë 夫羅拉 — 南部海岸城
+- 註:2026-08 補收錄(原始清單成形時尚無官方街景);資料湖目前只有 2016 coverage
+
 ### AT Austria 奧地利
 - Vienna 維也納 — 首都
 - Salzburg 薩爾茨堡 — 莫札特城
