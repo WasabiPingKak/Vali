@@ -45,7 +45,7 @@ EOFCFG
   fi
 
   echo "--- Running $cc ($continent) ---"
-  dotnet run --project src/Vali -c Release -- generate --file "$config_file" 2>&1 | grep -E "locations saved|Exception|OutOfMemory" || echo "  WARN: $cc no output match"
+  dotnet run --project src/Vali -c Release -f net8.0 -p:TargetFrameworks=net8.0 -- generate --file "$config_file" 2>&1 | grep -E "locations saved|Exception|OutOfMemory" || echo "  WARN: $cc no output match"
 
   # Vali 輸出在 config 旁邊,搬到 locations/ 並清掉副產品
   local vali_output="${MAP_DIR}/config/${cc_file}-locations.json"
