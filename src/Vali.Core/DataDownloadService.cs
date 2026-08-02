@@ -90,7 +90,7 @@ public static class DataDownloadService
                         var r2FilesDownloaded = new List<R2Object>();
                         foreach (var r2Files in filesToDownload.GroupBy(downloadOperation.groupBy))
                         {
-                            exitRequested = Console.KeyAvailable && Console.ReadKey().KeyChar == 's';
+                            exitRequested = !Console.IsInputRedirected && Console.KeyAvailable && Console.ReadKey().KeyChar == 's';
                             if (exitRequested)
                             {
                                 task.StopTask();
