@@ -17,7 +17,8 @@
   ],
   "output": {
     "locationTags": [
-      "CountryCode"
+      "CountryCode",
+      "Year"
     ],
     "panoIdCountryCodes": [
       "*"

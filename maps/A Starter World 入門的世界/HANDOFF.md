@@ -43,9 +43,14 @@
   "geometryFilters": [
     { "filePath": "maps/A Starter World 入門的世界/洲名/xx.geojson", "inclusionMode": "include", "combinationMode": "union" }
   ],
-  "output": { "locationTags": ["CountryCode"] }
+  "output": { "locationTags": ["CountryCode", "Year"], "panoIdCountryCodes": ["*"] }
 }
 ```
+
+output 兩個設定的用途:
+
+- `panoIdCountryCodes: ["*"]`:每點鎖定官方 panoId,避免 GeoGuessr 遊玩時就近解析到非官方照片球
+- `locationTags` 加 `Year`:點位帶年份標籤,分配腳本據此做「新景(2020+)優先、舊景補位」的抽選——新舊 coverage 並存的國家(如巴爾幹)會優先抽新景;新景不足配額的(RS、ME)新景全收後用舊景補滿
 
 選擇原因：
 
