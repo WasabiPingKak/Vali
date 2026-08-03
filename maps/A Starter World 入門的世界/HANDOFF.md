@@ -38,7 +38,7 @@
     "key": "EvenlyByDistanceWithinCountry",
     "fixedMinDistance": 100
   },
-  "globalLocationFilter": "Buildings200 gte 3",
+  "globalLocationFilter": "Buildings200 gte 3 and ArrowCount gte 2",
   "enableDefaultLocationFilters": true,
   "geometryFilters": [
     { "filePath": "maps/A Starter World 入門的世界/洲名/xx.geojson", "inclusionMode": "include", "combinationMode": "union" }
@@ -82,7 +82,9 @@ output 兩個設定的用途:
 
 ## Filter 條件摘要
 
-1. **`globalLocationFilter`**:`Buildings200 gte 3`(200m 內至少 3 棟建築)
+1. **`globalLocationFilter`**:`Buildings200 gte 3 and ArrowCount gte 2`
+   - `Buildings200 gte 3`:200m 內至少 3 棟建築(市區感)
+   - `ArrowCount gte 2`:街景至少有兩個導航箭頭 = 排除死路盡頭與孤立點。來自 Google 資料,不受 OSM 標註品質影響
    - 原本另有 `Roads0 gte 2`(限定路口),2026-08 移除:OSM 路網稀疏的國家(BT 等)會被誤殺,放寬後小國點池明顯變大
 2. **`enableDefaultLocationFilters: true`** 啟用的預設 filter:
    - 排隧道（`Tunnels10 == 0`）

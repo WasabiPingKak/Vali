@@ -1,16 +1,27 @@
 {
-  "countryCodes": ["AL"],
+  "countryCodes": [
+    "AL"
+  ],
   "distributionStrategy": {
     "key": "EvenlyByDistanceWithinCountry",
     "fixedMinDistance": 100
   },
-  "globalLocationFilter": "Buildings200 gte 3",
+  "globalLocationFilter": "Buildings200 gte 3 and ArrowCount gte 2",
   "enableDefaultLocationFilters": true,
   "geometryFilters": [
-    { "filePath": "maps/A Starter World 入門的世界/歐洲/al.geojson", "inclusionMode": "include", "combinationMode": "union" }
+    {
+      "filePath": "maps/A Starter World 入門的世界/歐洲/al.geojson",
+      "inclusionMode": "include",
+      "combinationMode": "union"
+    }
   ],
   "output": {
-    "locationTags": ["CountryCode", "Year"],
-    "panoIdCountryCodes": ["*"]
+    "locationTags": [
+      "CountryCode",
+      "Year"
+    ],
+    "panoIdCountryCodes": [
+      "*"
+    ]
   }
 }

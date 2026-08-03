@@ -6,7 +6,7 @@
     "key": "EvenlyByDistanceWithinCountry",
     "fixedMinDistance": 100
   },
-  "globalLocationFilter": "Buildings200 gte 3",
+  "globalLocationFilter": "Buildings200 gte 3 and ArrowCount gte 2",
   "enableDefaultLocationFilters": true,
   "geometryFilters": [
     {

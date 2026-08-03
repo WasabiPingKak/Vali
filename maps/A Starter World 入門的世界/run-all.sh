@@ -31,7 +31,7 @@ run_country() {
     "key": "EvenlyByDistanceWithinCountry",
     "fixedMinDistance": 100
   },
-  "globalLocationFilter": "Buildings200 gte 3",
+  "globalLocationFilter": "Buildings200 gte 3 and ArrowCount gte 2",
   "enableDefaultLocationFilters": true,
   "geometryFilters": [
     { "filePath": "${MAP_DIR}/${continent}/${cc_file}.geojson", "inclusionMode": "include", "combinationMode": "union" }
@@ -45,7 +45,9 @@ EOFCFG
   fi
 
   echo "--- Running $cc ($continent) ---"
-  dotnet run --project src/Vali -c Release -f net8.0 -p:TargetFrameworks=net8.0 -- generate --file "$config_file" 2>&1 | grep -E "locations saved|Exception|OutOfMemory" || echo "  WARN: $cc no output match"
+  # 直接跑編譯好的 exe,避免多個 dotnet build 互搶檔案鎖;跑之前記得先 build:
+  # dotnet build src/Vali -c Release -p:TargetFrameworks=net8.0
+  "src/Vali/bin/Release/net8.0/Vali.exe" generate --file "$config_file" 2>&1 | grep -E "locations saved|Exception|OutOfMemory" || echo "  WARN: $cc no output match"
 
   # Vali 輸出在 config 旁邊,搬到 locations/ 並清掉副產品
   local vali_output="${MAP_DIR}/config/${cc_file}-locations.json"
