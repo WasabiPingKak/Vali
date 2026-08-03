@@ -52,6 +52,12 @@ output 兩個設定的用途:
 - `panoIdCountryCodes: ["*"]`:每點鎖定官方 panoId,避免 GeoGuessr 遊玩時就近解析到非官方照片球
 - `locationTags` 加 `Year`:點位帶年份標籤,分配腳本據此做「新景(2020+)優先、舊景補位」的抽選——新舊 coverage 並存的國家(如巴爾幹)會優先抽新景;新景不足配額的(RS、ME)新景全收後用舊景補滿
 
+## Pano 驗證(Newest,2026-08 對巴爾幹執行過)
+
+資料湖收錄有時差(Google 已上線的新景,湖裡可能只有舊 pano)。對 final 點跑 Newest 驗證可繞過資料湖:逐點呼叫 Google API,鎖定現場最新的**官方** pano(版權字串 `© YYYY Google` 過濾,非官方照片球自動排除、自動遞補次新官方)。2026-08 對巴爾幹 9 國跑過一輪,RS/ME/AL 的新景比例從 40/12/7% 升到 89/87/67%。
+
+**注意**:驗證結果寫在 `final/{cc}.json`。重跑分配腳本會從點池重產 final 並覆蓋驗證結果,之後要再驗一次。合併匯入檔若只需重組(不重抽),用 merge-only 流程直接串 final + 手選檔。
+
 選擇原因：
 
 1. 不分行政區,goal 不會被 geojson 沒覆蓋到的空行政區分走（`MaxCountByFixedMinDistance` 的核心問題,詳見 git history 裡的舊版 HANDOFF）
