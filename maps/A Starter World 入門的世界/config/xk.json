@@ -6,7 +6,7 @@
     "key": "EvenlyByDistanceWithinCountry",
     "fixedMinDistance": 100
   },
-  "globalLocationFilter": "Buildings200 gte 3 and ArrowCount gte 2",
+  "globalLocationFilter": "Roads0 gt 2 or ArrowCount gte 3 or ClosestRiver lt 100 or ClosestRailway lt 100",
   "enableDefaultLocationFilters": true,
   "geometryFilters": [
     {
