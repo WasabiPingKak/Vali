@@ -8,12 +8,17 @@
 
 **110 國已全部產出點位**(含 2026-08 補收錄的 AL 阿爾巴尼亞)，結果在 `locations/{cc}.json`（檔名用 geojson 命名，英國是 `uk.json`）。各國 Vali 設定在 `config/{cc}.json`，各國點數統計見 `point-counts.md`。
 
-最終匯入檔:`A Starter World 入門的世界.json` = 40,000 自動配額點 + 68 手選點 = **40,068 點**,絕大多數鎖定官方 panoId。
+**2026-08-04 點池已用新 filter 全面重產**（路口/河鐵交會版，見下方 Filter 條件摘要），並用 `allocate.py` 重跑分配，`final/` 與匯入檔都是新結果。SZ 同時換了重畫的城市框（原檔誤存為 Untitled.geojson）。**巴爾幹 pano 驗證已被本次分配覆蓋，尚未重驗**。
 
-手選檔:`locations/` 下所有 **GeoGuessr dict 格式**(`{name, customCoordinates}`)的檔案都會被分配腳本視為手選來源自動合併;裸陣列格式則是各國點池。目前有兩個:
+**分配腳本:`allocate.py`**（2026-08-04 重寫,舊腳本從未 commit 已失傳）。規則:總量 40,000 點、以國家為單位盡可能均分、歐洲與亞洲各上限 30%（water-filling,點池不足全給、配額回流）、新景（2020+）優先舊景補位、手選檔（dict 格式）自動合併並以 panoId 去重。一併重產 `point-counts.md` 與 `final-map-countries.md`。手選點國別歸屬走 Nominatim reverse geocode,快取在 `handpick-countries.json`（可手動修正,如聖誕島 AU→CX）,平常跑 `python allocate.py` 全離線,手選檔有新點時加 `--geocode`。抽選用固定 seed,同輸入重跑結果相同。
+
+最終匯入檔:`A Starter World 入門的世界.json` = 40,000 自動配額點 + 89 手選點 = **40,089 點**,絕大多數鎖定官方 panoId。
+
+手選檔:`locations/` 下所有 **GeoGuessr dict 格式**(`{name, customCoordinates}`)的檔案都會被分配腳本視為手選來源自動合併;裸陣列格式則是各國點池。目前有三個:
 
 - `starter_world_handpick.json`(38 點):全球知名地標(雪梨歌劇院、自由女神、泰姬瑪哈、聖家堂等)+ EG 吉薩、CX 聖誕島、BR 巴西利亞
 - `starter_world_bm.json`(30 點):百慕達漢米爾頓(Vali 資料庫整島只有 113 點,程式產不出結果,改手選)
+- `beginner_world_bt_hanpick_extend.json`(21 點):不丹手動補點(新 filter 後 BT 點池只剩 62,重複率太高,2026-08 手選補強)
 
 合併規則:手選點接在自動點後面,panoId 重複的自動去除。
 
@@ -38,7 +43,7 @@
     "key": "EvenlyByDistanceWithinCountry",
     "fixedMinDistance": 100
   },
-  "globalLocationFilter": "Buildings200 gte 3 and ArrowCount gte 2",
+  "globalLocationFilter": "Roads0 gt 2 or ArrowCount gte 3 or ClosestRiver lt 100 or ClosestRailway lt 100",
   "enableDefaultLocationFilters": true,
   "geometryFilters": [
     { "filePath": "maps/A Starter World 入門的世界/洲名/xx.geojson", "inclusionMode": "include", "combinationMode": "union" }
@@ -82,10 +87,12 @@ output 兩個設定的用途:
 
 ## Filter 條件摘要
 
-1. **`globalLocationFilter`**:`Buildings200 gte 3 and ArrowCount gte 2`
-   - `Buildings200 gte 3`:200m 內至少 3 棟建築(市區感)
-   - `ArrowCount gte 2`:街景至少有兩個導航箭頭 = 排除死路盡頭與孤立點。來自 Google 資料,不受 OSM 標註品質影響
-   - 原本另有 `Roads0 gte 2`(限定路口),2026-08 移除:OSM 路網稀疏的國家(BT 等)會被誤殺,放寬後小國點池明顯變大
+1. **`globalLocationFilter`**:`Roads0 gt 2 or ArrowCount gte 3 or ClosestRiver lt 100 or ClosestRailway lt 100`
+   - `Roads0 gt 2`:該點有 3 條以上道路交會 = 交叉路口(OSM 路網資料)
+   - `ArrowCount gte 3`:街景有 3 個以上導航箭頭 = Google 端的路口訊號,補 OSM 路口標註不全的國家(JP 等)
+   - `ClosestRiver lt 100` / `ClosestRailway lt 100`:距河流/鐵路 100m 內 = 道路與河川鐵道的交會處
+   - 2026-08 第二次改版:舊條件 `Buildings200 gte 3 and ArrowCount gte 2` 會選到大量筆直路段中間的點,難以定位,社群做法是放路口/河鐵交會等有定位線索的位置。`Buildings200` 移除:geojson 城市框已保證市區感,此條件在框內近乎恆真
+   - 已知代價:OSM 與 Google 訊號都稀疏的小國點池大縮,歷史上 `Roads0 gte 2` 曾因此在前一版被整個移除過,本次為了點位品質接受縮減,點池過小的國家個案處理(放寬或手選)
 2. **`enableDefaultLocationFilters: true`** 啟用的預設 filter:
    - 排隧道（`Tunnels10 == 0`）
    - 排壞圖（無 description 且非 Scout 的 coverage）
