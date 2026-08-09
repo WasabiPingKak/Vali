@@ -1,0 +1,17 @@
+{
+  "regions": [
+    { "code": "CA-AB", "count": 2000 },
+    { "code": "CA-BC", "count": 2000 },
+    { "code": "CA-MB", "count": 2000 },
+    { "code": "CA-NB", "count": 2000 },
+    { "code": "CA-NL", "count": 2000 },
+    { "code": "CA-NS", "count": 2000 },
+    { "code": "CA-ON", "count": 2000 },
+    { "code": "CA-PE", "count": 2000 },
+    { "code": "CA-QC", "count": 2000 },
+    { "code": "CA-SK", "count": 2000 },
+    { "code": "CA-YT", "count": 1074 },
+    { "code": "CA-NT", "count": 467 },
+    { "code": "CA-NU", "count": 195 }
+  ]
+}
