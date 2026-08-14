@@ -1,0 +1,27 @@
+{
+  "countryCodes": [
+    "PY"
+  ],
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 100
+  },
+  "globalLocationFilter": "Roads0 gt 2 or ArrowCount gte 3 or ClosestRiver lt 100 or ClosestRailway lt 100",
+  "enableDefaultLocationFilters": true,
+  "geometryFilters": [
+    {
+      "filePath": "maps/World's Biggest Cities 各國最大城市/南美洲/py.geojson",
+      "inclusionMode": "include",
+      "combinationMode": "union"
+    }
+  ],
+  "output": {
+    "locationTags": [
+      "CountryCode",
+      "Year"
+    ],
+    "panoIdCountryCodes": [
+      "*"
+    ]
+  }
+}
