@@ -1,0 +1,14 @@
+{
+  "countryCodes": ["MY"],
+  "subdivisionInclusions": { "MY": ["MY-16"] },
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 150
+  },
+  "globalLocationFilter": "Buildings200 gte 4 and Roads0 gte 2",
+  "enableDefaultLocationFilters": true,
+  "output": {
+    "locationTags": ["CountryCode", "Year", "Buildings200", "Roads0"],
+    "panoIdCountryCodes": ["*"]
+  }
+}
