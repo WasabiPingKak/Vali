@@ -1,0 +1,27 @@
+{
+  "countryCodes": [
+    "HK"
+  ],
+  "distributionStrategy": {
+    "key": "EvenlyByDistanceWithinCountry",
+    "fixedMinDistance": 25
+  },
+  "globalLocationFilter": "Roads0 gt 2 or ArrowCount gte 3 or ClosestRiver lt 100 or ClosestRailway lt 100",
+  "enableDefaultLocationFilters": true,
+  "geometryFilters": [
+    {
+      "filePath": "maps/A District-Balanced Hong Kong 平衡行政區的香港/geojson/hk-so.geojson",
+      "inclusionMode": "include",
+      "combinationMode": "union"
+    }
+  ],
+  "output": {
+    "locationTags": [
+      "CountryCode",
+      "Year"
+    ],
+    "panoIdCountryCodes": [
+      "*"
+    ]
+  }
+}
