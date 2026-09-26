@@ -60,7 +60,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 MAP_DIR = Path(__file__).parent
 MAP_NAME = MAP_DIR.name
 SCRIPTS_DIR = MAP_DIR.parent.parent / "scripts"
-CAP = 1_500
+CAP = 2_000
 CAP_OVERRIDES: dict[str, int] = {}
 SEED = 42
 NEW_YEAR = 2020  # 新景門檻
