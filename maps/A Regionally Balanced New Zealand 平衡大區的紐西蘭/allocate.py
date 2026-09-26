@@ -8,6 +8,11 @@
 不產生 distribution.json:行政區分佈由 CasualGuessr 匯入時自動計算。
 
 分配規則:
+  - Vali 的大區標記是「整個地方行政區(district)歸一個大區」的粗略版,
+    跨大區的 district(懷塔基、斯特拉福德、羅托魯瓦、陶波、蘭吉蒂基)整區被歸到
+    同一邊,例如奧馬魯被標成坎特伯雷、斯特拉福德鎮被標成馬納瓦圖。分配前先用
+    geoBoundaries 的區議會邊界(ADM1)逐點重新歸區,約 400 點會換區,
+    配額與 tags 都以重新歸區後的結果為準,跟 CasualGuessr 顯示端的邊界一致
   - 每個大區上限 CAP 點,點池不足者全收;個別大區可用 CAP_OVERRIDES 調整
     (例如尼爾森只有一座城市,面積 445 km²,可視情況給較低配額)
   - 查塔姆群島領地(NZ-CIT)沒有街景資料,不納入地圖
@@ -26,6 +31,8 @@
 scripts/geoBoundaries-NZL-ADM0.geojson(geoBoundaries gbOpen,NZ Stats 版,
 原檔 106MB 太大,已用 shapely 以 0.0003 度(約 30m)容差簡化到 3.4MB,
 島嶼數與面積不變,對 400m 的離岸判斷沒有影響)、
+scripts/geoBoundaries-NZL-ADM1.geojson(同來源的 16 大區 + 查塔姆群島邊界,
+同樣以 0.0003 度簡化;geoBoundaries 把尼爾森標成 NZ-NLS,讀入時改回 ISO 的 NZ-NSN)、
 scripts/country-coder-borders.json(@rapideditor/country-coder 的 borders.json)
 需要 shapely:pip install shapely
 
@@ -80,15 +87,71 @@ REGIONS = {
 }
 
 
-def load_boundary(name: str):
+def load_geojson(name: str) -> dict:
     path = SCRIPTS_DIR / name
     if not path.exists():
         sys.exit(
             f"找不到邊界資料 {path},下載連結可從 geoBoundaries API 取得:\n"
-            f"https://www.geoboundaries.org/api/current/gbOpen/<ISO3>/ADM0/"
+            f"https://www.geoboundaries.org/api/current/gbOpen/<ISO3>/<ADM0|ADM1>/"
         )
-    data = json.loads(path.read_text(encoding="utf-8"))
-    return shape(data["features"][0]["geometry"])
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_boundary(name: str):
+    return shape(load_geojson(name)["features"][0]["geometry"])
+
+
+CODE_FIX = {"NZ-NLS": "NZ-NSN"}  # geoBoundaries 的尼爾森代碼不是 ISO
+
+
+def retag_regions(pools: dict[str, list]) -> dict[str, list]:
+    """把所有點池合併後,用區議會邊界逐點重新歸區。
+
+    落在所有大區多邊形外的點(海岸簡化縫隙)歸給最近的大區;
+    歸到 REGIONS 以外的區(查塔姆群島)直接丟掉。
+    """
+    print("以區議會邊界重新歸區...", flush=True)
+    feats = load_geojson("geoBoundaries-NZL-ADM1.geojson")["features"]
+    codes, geoms = [], []
+    for f in feats:
+        code = CODE_FIX.get(f["properties"]["shapeISO"], f["properties"]["shapeISO"])
+        codes.append(code.removeprefix("NZ-"))
+        geoms.append(shape(f["geometry"]))
+    for g in geoms:
+        shapely.prepare(g)
+
+    all_pts = [loc for rg in sorted(pools) for loc in pools[rg]]
+    pts = shapely.points(
+        [loc["lng"] for loc in all_pts], [loc["lat"] for loc in all_pts]
+    )
+    assigned = [None] * len(all_pts)
+    for code, g in zip(codes, geoms):
+        for i in shapely.contains(g, pts).nonzero()[0]:
+            assigned[i] = code
+    gaps = [i for i, a in enumerate(assigned) if a is None]
+    if gaps:
+        gap_pts = pts[gaps]
+        dists = [shapely.distance(g, gap_pts) for g in geoms]
+        for k, i in enumerate(gaps):
+            assigned[i] = codes[min(range(len(geoms)), key=lambda j: dists[j][k])]
+
+    retagged: dict[str, list] = {rg: [] for rg in REGIONS}
+    dropped = 0
+    for loc, code in zip(all_pts, assigned):
+        if code not in retagged:
+            dropped += 1
+            continue
+        retagged[code].append(loc)
+    before = {rg: len(pools[rg]) for rg in pools}
+    for rg in sorted(retagged):
+        diff = len(retagged[rg]) - before.get(rg, 0)
+        if diff:
+            print(f"  NZ-{rg}: {before.get(rg, 0):,} → {len(retagged[rg]):,} ({diff:+,})", flush=True)
+    if gaps:
+        print(f"  邊界縫隙歸最近大區:{len(gaps)} 點", flush=True)
+    if dropped:
+        print(f"  歸到 REGIONS 以外的區,丟棄:{dropped} 點", flush=True)
+    return retagged
 
 
 def border_filter(pools: dict[str, list]) -> dict[str, list]:
@@ -205,6 +268,8 @@ def write_point_counts(pools, quotas, new_counts, today):
         "or ClosestRailway lt 100` + 預設 filter(排隧道、壞圖),不看建築密度",
         "邊境/船拍過濾:紐西蘭沒有陸地鄰國,只剔除 country-coder(前端判國套件)"
         "NZ 多邊形外的點,與離紐西蘭陸地約 400m 外的船拍/水上點(本地 point-in-polygon)",
+        "大區歸屬:Vali 的標記是整個 district 歸一個大區的粗略版,分配前以 geoBoundaries "
+        "區議會邊界(ADM1)逐點重新歸區,約 1,000 點換區(奧馬魯歸奧塔哥、斯特拉福德歸塔拉納基等)",
         "查塔姆群島領地(NZ-CIT)沒有街景資料,不納入",
         f"點池總量:**{len(pools)} 大區 / {fmt(total_pool)} 點**;"
         f"地圖配額:**{fmt(total_quota)} 點**"
@@ -233,6 +298,7 @@ def main() -> None:
         pools[rg] = json.loads(
             (MAP_DIR / "locations" / f"{rg.lower()}.json").read_text(encoding="utf-8")
         )
+    pools = retag_regions(pools)
     pools = border_filter(pools)
 
     quotas = {
